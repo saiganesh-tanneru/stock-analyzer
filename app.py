@@ -14,8 +14,7 @@ FinvizScraper = importlib.import_module("Finviz-Scraper")
 app = Flask(__name__, static_folder='frontend/dist', static_url_path='/')
 CORS(app)  # Enable CORS for local cross-origin React dev server testing
 
-TICKERS_CSV = 'tickers.csv'
-STOCKS_CSV = 'stocks_data.csv'
+import db
 
 # Background scrape status
 scrape_status = {
@@ -49,33 +48,12 @@ def fetch_name_from_finviz(symbol):
     return ""
 
 def load_tickers():
-    """Load tickers and names from tickers.csv."""
-    tickers = []
-    if os.path.exists(TICKERS_CSV):
-        try:
-            with open(TICKERS_CSV, newline='') as f:
-                reader = csv.reader(f)
-                header = next(reader, None)  # skip header
-                for row in reader:
-                    if row:
-                        tickers.append({
-                            'symbol': row[0].strip(),
-                            'name': row[1].strip() if len(row) > 1 else ''
-                        })
-        except Exception as e:
-            print(f"Error loading tickers.csv: {e}")
-    return tickers
+    """Load tickers and names."""
+    return db.load_tickers()
 
 def save_tickers(tickers):
-    """Save tickers list to tickers.csv."""
-    try:
-        with open(TICKERS_CSV, 'w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(['Symbol', 'Name'])
-            for t in tickers:
-                writer.writerow([t['symbol'], t['name']])
-    except Exception as e:
-        print(f"Error saving tickers.csv: {e}")
+    """Save tickers list."""
+    return db.save_tickers_bulk(tickers)
 
 def run_full_scrape_thread():
     """Run full scraping process in a separate background thread."""
@@ -133,35 +111,20 @@ def add_ticker():
     if not name:
         return jsonify({'error': f'Failed to resolve name for {symbol}. Ticker may be invalid.'}), 400
         
-    # Save ticker to tickers.csv
-    tickers.append({'symbol': symbol, 'name': name})
-    save_tickers(tickers)
+    # Save ticker to database
+    db.save_ticker(symbol, name)
     
     # Scrape data for this single stock in the background
     try:
         stock_data = FinvizScraper.scrape_single_stock_dict(symbol, name)
         if stock_data:
-            # Load existing stocks data, append the new one, and write back
-            if os.path.exists(STOCKS_CSV):
-                try:
-                    df = pd.read_csv(STOCKS_CSV)
-                    # Remove duplicate if somehow exists
-                    df = df[df['Ticker'] != symbol]
-                    # Append new row
-                    df_new = pd.DataFrame([stock_data])
-                    df = pd.concat([df, df_new], ignore_index=True)
-                except Exception as e:
-                    print(f"Error appending stock row: {e}")
-                    df = pd.DataFrame([stock_data])
-            else:
-                df = pd.DataFrame([stock_data])
-            
-            # Save updated CSV
-            df.to_csv(STOCKS_CSV, index=False)
+            db.save_stocks_batch([stock_data])
             
             # Re-generate the HTML dashboard template too
             try:
-                FinvizScraper.save_to_html(df, 'stocks_data.html')
+                all_stocks_df = pd.DataFrame(db.load_stocks())
+                if not all_stocks_df.empty:
+                    FinvizScraper.save_to_html(all_stocks_df, 'stocks_data.html')
             except Exception as html_err:
                 print(f"Warning: Failed to save HTML cache: {html_err}")
                 
@@ -236,10 +199,9 @@ def add_tickers_bulk():
                 except Exception as exc:
                     errors.append({'symbol': sym, 'reason': str(exc)})
 
-    # Save all new entries to tickers.csv
+    # Save all new entries to database
     if new_entries:
-        tickers.extend(new_entries)
-        save_tickers(tickers)
+        db.save_tickers_bulk(new_entries)
 
         # Trigger background scrape for just the new symbols
         def scrape_new_symbols():
@@ -248,18 +210,11 @@ def add_tickers_bulk():
                 try:
                     stock_data = FinvizScraper.scrape_single_stock_dict(sym, name)
                     if stock_data:
-                        if os.path.exists(STOCKS_CSV):
-                            try:
-                                df = pd.read_csv(STOCKS_CSV)
-                                df = df[df['Ticker'] != sym]
-                                df = pd.concat([df, pd.DataFrame([stock_data])], ignore_index=True)
-                            except Exception:
-                                df = pd.DataFrame([stock_data])
-                        else:
-                            df = pd.DataFrame([stock_data])
-                        df.to_csv(STOCKS_CSV, index=False)
+                        db.save_stocks_batch([stock_data])
                         try:
-                            FinvizScraper.save_to_html(df, 'stocks_data.html')
+                            all_stocks_df = pd.DataFrame(db.load_stocks())
+                            if not all_stocks_df.empty:
+                                FinvizScraper.save_to_html(all_stocks_df, 'stocks_data.html')
                         except Exception:
                             pass
                 except Exception as e:
@@ -280,44 +235,31 @@ def add_tickers_bulk():
 @app.route('/api/tickers/<symbol>', methods=['DELETE'])
 def delete_ticker(symbol):
     symbol = symbol.strip().upper()
-    tickers = load_tickers()
+    tickers = db.load_tickers()
     
-    # Filter out ticker
-    updated_tickers = [t for t in tickers if t['symbol'] != symbol]
-    if len(updated_tickers) == len(tickers):
+    if not any(t['symbol'] == symbol for t in tickers):
         return jsonify({'error': f'Ticker {symbol} not found'}), 404
         
-    save_tickers(updated_tickers)
+    db.delete_ticker(symbol)
     
-    # Remove from stock data cache too
-    if os.path.exists(STOCKS_CSV):
-        try:
-            df = pd.read_csv(STOCKS_CSV)
-            df = df[df['Ticker'] != symbol]
-            df.to_csv(STOCKS_CSV, index=False)
-            
-            # Re-generate HTML
-            try:
-                FinvizScraper.save_to_html(df, 'stocks_data.html')
-            except Exception as html_err:
-                print(f"Warning: Failed to save HTML cache: {html_err}")
-        except Exception as e:
-            print(f"Error deleting stock row: {e}")
+    # Re-generate HTML
+    try:
+        all_stocks_df = pd.DataFrame(db.load_stocks())
+        if not all_stocks_df.empty:
+            FinvizScraper.save_to_html(all_stocks_df, 'stocks_data.html')
+    except Exception as html_err:
+        print(f"Warning: Failed to save HTML cache: {html_err}")
             
     return get_stocks()
 
 @app.route('/api/stocks', methods=['GET'])
 def get_stocks():
     # Load scraped data
-    scraped_df = pd.DataFrame()
-    if os.path.exists(STOCKS_CSV):
-        try:
-            scraped_df = pd.read_csv(STOCKS_CSV).fillna('')
-        except Exception as e:
-            return jsonify({'error': f'Failed to read stocks data: {str(e)}'}), 500
+    stocks_list = db.load_stocks()
+    scraped_df = pd.DataFrame(stocks_list) if stocks_list else pd.DataFrame()
 
-    # Merge with tickers.csv so unscraped tickers still appear as stub rows
-    tickers = load_tickers()
+    # Merge so unscraped tickers still appear as stub rows
+    tickers = db.load_tickers()
     scraped_symbols = set(scraped_df['Ticker'].astype(str).str.upper()) if not scraped_df.empty else set()
 
     stub_rows = []
@@ -327,14 +269,15 @@ def get_stocks():
             stub_rows.append({'Ticker': sym, 'Name': t['name'], '_pending': True})
 
     if stub_rows:
-        stub_df = pd.DataFrame(stub_rows).fillna('')
+        stub_df = pd.DataFrame(stub_rows)
         if scraped_df.empty:
             combined = stub_df
         else:
-            combined = pd.concat([scraped_df, stub_df], ignore_index=True).fillna('')
+            combined = pd.concat([scraped_df, stub_df], ignore_index=True)
     else:
         combined = scraped_df
 
+    combined = combined.fillna('')
     records = combined.to_dict(orient='records')
     return jsonify(records)
 
@@ -362,11 +305,12 @@ def get_scrape_status():
 def refresh_tradingview():
     """Quick-refresh real-time TradingView technicals and analyst targets for all stocks in ~300ms."""
     import tradingview_service
-    if not os.path.exists(STOCKS_CSV):
+    stocks_list = db.load_stocks()
+    if not stocks_list:
         return jsonify({'error': 'No stocks data available to refresh'}), 400
 
     try:
-        df = pd.read_csv(STOCKS_CSV)
+        df = pd.DataFrame(stocks_list)
         symbols = df['Ticker'].dropna().tolist()
         tv_batch = tradingview_service.fetch_tradingview_batch(symbols)
 
@@ -385,8 +329,13 @@ def refresh_tradingview():
             scores.append(s)
         df['Composite Score'] = scores
 
-        df.to_csv(STOCKS_CSV, index=False)
-        FinvizScraper.save_to_html(df, 'stocks_data.html')
+        db.save_stocks_batch(df.to_dict(orient='records'))
+        
+        try:
+            FinvizScraper.save_to_html(df, 'stocks_data.html')
+        except Exception:
+            pass
+            
         return jsonify({'message': f'Refreshed TradingView metrics and scores for {len(symbols)} stocks'})
     except Exception as e:
         return jsonify({'error': f'Failed to refresh TradingView metrics: {str(e)}'}), 500

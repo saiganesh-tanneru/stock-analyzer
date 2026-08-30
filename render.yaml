@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: stock-analyzer-portal
+    env: python
+    buildCommand: "pip install -r requirements.txt && npm run build --prefix frontend"
+    startCommand: "gunicorn app:app"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.12
+      - key: DATABASE_URL
+        sync: false # User will configure this manually in Render dashboard
+      # Add this so python stdout logs print in real-time
+      - key: PYTHONUNBUFFERED
+        value: "true"

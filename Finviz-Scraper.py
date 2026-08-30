@@ -12,6 +12,7 @@ import json
 from curl_cffi import requests as curl_requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import tradingview_service
+import db
 
 # set Google Sheets variables
 try:
@@ -242,16 +243,28 @@ def scrape_finviz(symbols, ticker_names=None, progress_callback=None, max_worker
         print(f"Warning: TradingView enrichment failed: {tv_err}")
     
     # Merge newly scraped results into existing data so existing rows are preserved
-    import os
-    if os.path.exists('stocks_data.csv'):
+    if db.is_db_enabled():
         try:
-            old_df = pd.read_csv('stocks_data.csv')
-            new_syms = set(df['Ticker'].tolist())
-            kept_old = old_df[~old_df['Ticker'].isin(new_syms)]
-            if not kept_old.empty:
-                df = pd.concat([df, kept_old], ignore_index=True)
+            old_stocks = db.load_stocks()
+            if old_stocks:
+                old_df = pd.DataFrame(old_stocks)
+                new_syms = set(df['Ticker'].tolist())
+                kept_old = old_df[~old_df['Ticker'].isin(new_syms)]
+                if not kept_old.empty:
+                    df = pd.concat([df, kept_old], ignore_index=True)
         except Exception as merge_err:
-            print(f"Warning: merge failed: {merge_err}")
+            print(f"Warning: database merge failed: {merge_err}")
+    else:
+        import os
+        if os.path.exists('stocks_data.csv'):
+            try:
+                old_df = pd.read_csv('stocks_data.csv')
+                new_syms = set(df['Ticker'].tolist())
+                kept_old = old_df[~old_df['Ticker'].isin(new_syms)]
+                if not kept_old.empty:
+                    df = pd.concat([df, kept_old], ignore_index=True)
+            except Exception as merge_err:
+                print(f"Warning: merge failed: {merge_err}")
     
     # Optional Google Sheets Integration
     if has_gsheets:
@@ -268,11 +281,15 @@ def scrape_finviz(symbols, ticker_names=None, progress_callback=None, max_worker
     else:
         print("\nNote: user_specific_variables.py not found. Google Sheets integration skipped.")
         
-    # Write output CSV from dataframe
+    # Write output to database or CSV
     output_file_with_date = 'output' + datetime.today().strftime('%Y-%m-%d') + '.csv'
-    df.to_csv(output_file_with_date, index=False)
-    df.to_csv('stocks_data.csv', index=False)
-    print(f"Data saved to local CSV file: {output_file_with_date} and stocks_data.csv")
+    if db.is_db_enabled():
+        db.save_stocks_batch(df.to_dict(orient='records'))
+        print(f"Data saved to database.")
+    else:
+        df.to_csv(output_file_with_date, index=False)
+        df.to_csv('stocks_data.csv', index=False)
+        print(f"Data saved to local CSV file: {output_file_with_date} and stocks_data.csv")
     
     # Write output HTML from dataframe
     output_file_html = 'output' + datetime.today().strftime('%Y-%m-%d') + '.html'
