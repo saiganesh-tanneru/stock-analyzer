@@ -39,6 +39,7 @@ export default function App() {
   const [tickers, setTickers] = useState([]);
   const [scrapeStatus, setScrapeStatus] = useState({ running: false, progress: 0, total: 0, message: 'Idle' });
   const [isDemo, setIsDemo] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState('');
