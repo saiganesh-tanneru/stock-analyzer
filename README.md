@@ -44,3 +44,5 @@ where <<save_path>> is the location to save the results (default is `C:/SnP500.c
 
 ## Data accuracy
 The price data has a lag of 15-20 minutes. Certain financial ratios might be affected by the price. It is recommended to scrape after market close or before market open. Further cleaning of the scraped data might be required (e.g. Market Cap, Income and Sales are returned with B or M for Billion or Million respectively).
+
+#
