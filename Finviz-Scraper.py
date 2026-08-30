@@ -97,9 +97,18 @@ def scrape_single_stock_dict(symbol, ticker_name=None):
             'GF Valuation': ''
         }
         
+        import os
+        import urllib.parse
+        scraperapi_key = os.environ.get('SCRAPERAPI_KEY')
+        
         for attempt in range(2):
             try:
-                guru_req = curl_requests.get("https://www.gurufocus.com/stock/" + guru_symbol, impersonate="chrome", timeout=12)
+                if scraperapi_key:
+                    target_url = "https://www.gurufocus.com/stock/" + guru_symbol
+                    proxy_url = f"http://api.scraperapi.com?api_key={scraperapi_key}&url=" + urllib.parse.quote(target_url)
+                    guru_req = requests.get(proxy_url, timeout=25)
+                else:
+                    guru_req = curl_requests.get("https://www.gurufocus.com/stock/" + guru_symbol, impersonate="chrome", timeout=12)
                 if guru_req.status_code == 200:
                     guru_soup = BeautifulSoup(guru_req.content, 'html.parser')
                     

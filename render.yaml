@@ -13,3 +13,5 @@ services:
       # Add this so python stdout logs print in real-time
       - key: PYTHONUNBUFFERED
         value: "true"
+      - key: SCRAPERAPI_KEY
+        value: "" # Optional free ScraperAPI.com key to bypass GuruFocus Cloudflare block on Render
