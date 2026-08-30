@@ -105,35 +105,37 @@ def add_ticker():
     tickers = load_tickers()
     
     # Check for duplicate — return 409 with warning (not a hard error)
-    if any(t['symbol'] == symbol for t in tickers):
+    if any(t['symbol'].strip().upper() == symbol for t in tickers):
         return jsonify({'warning': f'Ticker {symbol} is already in your watchlist and was skipped.'}), 409
 
     # Fetch company name
     name = fetch_name_from_finviz(symbol)
     if not name:
-        return jsonify({'error': f'Failed to resolve name for {symbol}. Ticker may be invalid.'}), 400
+        name = symbol
         
     # Save ticker to database
     db.save_ticker(symbol, name)
     
-    # Scrape data for this single stock in the background
-    try:
-        stock_data = FinvizScraper.scrape_single_stock_dict(symbol, name)
-        if stock_data:
-            db.save_stocks_batch([stock_data])
-            
-            # Re-generate the HTML dashboard template too
-            try:
-                all_stocks_df = pd.DataFrame(db.load_stocks())
-                if not all_stocks_df.empty:
-                    FinvizScraper.save_to_html(all_stocks_df, 'stocks_data.html')
-            except Exception as html_err:
-                print(f"Warning: Failed to save HTML cache: {html_err}")
-                
-    except Exception as scrape_err:
-        print(f"Warning: Single stock scrape failed for {symbol}: {scrape_err}")
+    # Scrape data for this single stock asynchronously in a background thread
+    def scrape_single_bg(sym, comp_name):
+        try:
+            stock_data = FinvizScraper.scrape_single_stock_dict(sym, comp_name)
+            if stock_data:
+                db.save_stocks_batch([stock_data])
+                try:
+                    all_stocks_df = pd.DataFrame(db.load_stocks())
+                    if not all_stocks_df.empty:
+                        FinvizScraper.save_to_html(all_stocks_df, 'stocks_data.html')
+                except Exception as html_err:
+                    print(f"Warning: Failed to save HTML cache: {html_err}")
+        except Exception as scrape_err:
+            print(f"Warning: Single stock scrape failed for {sym}: {scrape_err}")
 
-    # Return the full updated stocks list
+    thread = threading.Thread(target=scrape_single_bg, args=(symbol, name))
+    thread.daemon = True
+    thread.start()
+
+    # Return the full updated stocks list immediately
     return get_stocks()
 
 

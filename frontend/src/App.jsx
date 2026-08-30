@@ -334,20 +334,47 @@ export default function App() {
 
   const handleAddTicker = async (e) => {
     e.preventDefault();
-    if (isDemo) {
-      addToast("Adding tickers is disabled in Read-only Demo Mode.", "warning");
-      return;
-    }
     const raw = newTickerSymbol.trim();
     if (!raw) return;
 
     // Detect bulk vs single
     const isBulk = raw.includes(',') || raw.includes(';');
     const symbols = raw.split(/[,;]+/).map(s => s.trim().toUpperCase()).filter(Boolean);
+    if (symbols.length === 0) return;
+
+    // In Demo Mode (or on GitHub Pages static deployment)
+    if (isDemo || window.location.hostname.includes('github.io')) {
+      const newItems = [];
+      const newTickers = [];
+      symbols.forEach(sym => {
+        if (!tickers.some(t => (t.symbol || '').toUpperCase() === sym)) {
+          newTickers.push({ symbol: sym, name: sym });
+          newItems.push({
+            Ticker: sym,
+            Name: `${sym} (Demo Tracked)`,
+            Sector: 'General',
+            'Composite Score': '50',
+            Price: '100.00',
+            _pending: true
+          });
+        }
+      });
+
+      if (newItems.length > 0) {
+        setTickers(prev => [...prev, ...newTickers]);
+        setStocks(prev => [...newItems, ...prev]);
+        addToast(`Added ${newItems.map(i => i.Ticker).join(', ')} to watchlist (Session view in Demo Mode).`, 'info');
+      } else {
+        addToast("Entered ticker(s) already in your watchlist.", "warning");
+      }
+
+      setIsAddOpen(false);
+      setNewTickerSymbol('');
+      return;
+    }
 
     setIsAdding(true);
     setAddError('');
-    setAddWarning('');
 
     try {
       if (isBulk) {
