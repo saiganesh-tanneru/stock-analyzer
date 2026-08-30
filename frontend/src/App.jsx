@@ -784,15 +784,18 @@ const paginatedStocks = pageSize === -1
     return missingGF >= 2 ? 'partial' : 'complete';
   };
 
-  const getMissingFieldsTooltip = (item) => {
+  const getMissingFieldsList = (item) => {
+    if (!item) return [];
     const missing = [];
-    if (!item.Price || item.Price === '-') missing.push('Price (Finviz)');
-    if (!item['GF Value'] || item['GF Value'] === '-') missing.push('GF Value');
-    if (!item['GF Valuation'] || item['GF Valuation'] === '-') missing.push('GF Valuation');
-    if (!item['Piotroski F-Score'] || item['Piotroski F-Score'] === '-') missing.push('F-Score');
-    if (!item['Altman Z-Score'] || item['Altman Z-Score'] === '-') missing.push('Z-Score');
-    if (!item['P/E'] || item['P/E'] === '-') missing.push('P/E');
-    return missing.length > 0 ? `Missing: ${missing.join(', ')}` : '';
+    const isEmpty = (v) => v === undefined || v === null || v === '' || v === '-' || v === 'N/A' || v === 'null';
+    if (isEmpty(item.Price)) missing.push('Price (Finviz)');
+    if (isEmpty(item['GF Value'])) missing.push('GF Value');
+    if (isEmpty(item['GF Valuation'])) missing.push('GF Valuation');
+    if (isEmpty(item['Piotroski F-Score'])) missing.push('Piotroski F-Score');
+    if (isEmpty(item['Altman Z-Score'])) missing.push('Altman Z-Score');
+    if (isEmpty(item['P/E'])) missing.push('P/E Ratio');
+    if (isEmpty(item['TV Technical'])) missing.push('TradingView Technical');
+    return missing;
   };
 
   const getDetailGroups = (stock) => {
@@ -1394,7 +1397,6 @@ const paginatedStocks = pageSize === -1
                     const changeStr = item['Change %'] || '0.00%';
                     const isChangeNeg = changeStr.startsWith('-');
                     const dataStatus = getDataStatus(item);
-                    const missingTip = getMissingFieldsTooltip(item);
                     const daysToEarnings = item['Days to Earnings'];
                     const hasUpcomingEarnings = daysToEarnings !== null && daysToEarnings !== undefined && daysToEarnings !== '' && parseInt(daysToEarnings) <= 14 && parseInt(daysToEarnings) >= 0;
                     const pBreakdown = getPillarBreakdown(item);
@@ -1417,31 +1419,92 @@ const paginatedStocks = pageSize === -1
                           <div className="ticker-cell">
                             <span className="ticker-badge">{item.Ticker}</span>
                             {hasUpcomingEarnings && (
-                              <span className="earnings-alert-badge" title={`Upcoming Earnings Report on ${item['Next Earnings Date']} (${daysToEarnings} days)`}>
-                                📅 {daysToEarnings}d
-                              </span>
+                              <div className="tooltip-wrapper tooltip-align-left" onClick={(e) => e.stopPropagation()}>
+                                <span className="earnings-alert-badge">
+                                  📅 {daysToEarnings}d
+                                </span>
+                                <div className="custom-tooltip">
+                                  <div className="tooltip-title">
+                                    <i className="fa-solid fa-calendar-days" style={{ color: '#fbbf24' }}></i>
+                                    Earnings Catalyst
+                                  </div>
+                                  <div className="tooltip-body">
+                                    Expected on <strong>{item['Next Earnings Date']}</strong> ({daysToEarnings} day{daysToEarnings !== '1' && daysToEarnings !== 1 ? 's' : ''} away).
+                                  </div>
+                                </div>
+                              </div>
                             )}
                             {dataStatus === 'pending' && (
-                              <span className="data-status-icon pending" title={`Not yet scraped. Run a full scrape to populate.${missingTip ? '\n' + missingTip : ''}`}>
-                                <i className="fa-solid fa-clock"></i>
-                              </span>
+                              <div className="tooltip-wrapper tooltip-align-left" onClick={(e) => e.stopPropagation()}>
+                                <span className="data-status-icon pending">
+                                  <i className="fa-solid fa-clock"></i>
+                                </span>
+                                <div className="custom-tooltip">
+                                  <div className="tooltip-title">
+                                    <i className="fa-solid fa-clock" style={{ color: 'var(--text-secondary)' }}></i>
+                                    Pending Scrape
+                                  </div>
+                                  <div className="tooltip-body">
+                                    <p style={{ margin: '0 0 4px 0' }}>This stock was recently added and has not been scraped yet.</p>
+                                    <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Click "Start Scraping" above to pull live financials.</span>
+                                  </div>
+                                </div>
+                              </div>
                             )}
-                            {dataStatus === 'partial' && (
-                              <span className="data-status-icon partial" title={missingTip}>
-                                <i className="fa-solid fa-triangle-exclamation"></i>
-                              </span>
-                            )}
+                            {dataStatus === 'partial' && (() => {
+                              const missingList = getMissingFieldsList(item);
+                              return (
+                                <div className="tooltip-wrapper tooltip-align-left" onClick={(e) => e.stopPropagation()}>
+                                  <span className="data-status-icon partial">
+                                    <i className="fa-solid fa-triangle-exclamation"></i>
+                                  </span>
+                                  <div className="custom-tooltip">
+                                    <div className="tooltip-title">
+                                      <i className="fa-solid fa-triangle-exclamation" style={{ color: 'var(--warning)' }}></i>
+                                      Partial Financial Data
+                                    </div>
+                                    <div className="tooltip-body">
+                                      {missingList.length > 0 ? (
+                                        <>
+                                          <div style={{ color: '#e2e8f0', marginBottom: '4px' }}>Missing metrics:</div>
+                                          <div style={{ color: '#fbbf24', fontSize: '0.72rem', lineHeight: '1.4' }}>
+                                            {missingList.join(' • ')}
+                                          </div>
+                                        </>
+                                      ) : (
+                                        <p style={{ margin: 0 }}>Some fundamental metrics are incomplete.</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })()}
                           </div>
                         </td>
                         {visibleColumns.includes('Score') && (
                           <td>
                             {item['Composite Score'] !== undefined && item['Composite Score'] !== '' && item['Composite Score'] !== '-' ? (
-                              <div 
-                                className={`score-pill ${getScoreClass(item['Composite Score'])}`}
-                                title={`Composite Score: ${item['Composite Score']}/100 (${getConvictionTier(item['Composite Score'])})\n• Valuation: ${pBreakdown.valuation}/25\n• Quality & Safety: ${pBreakdown.quality}/35\n• Moat: ${pBreakdown.moat}/15\n• Momentum: ${pBreakdown.momentum}/25`}
-                              >
-                                <span className="score-num">{item['Composite Score']}</span>
-                                <span className="score-denom">/100</span>
+                              <div className="tooltip-wrapper" onClick={(e) => e.stopPropagation()}>
+                                <div className={`score-pill ${getScoreClass(item['Composite Score'])}`}>
+                                  <span className="score-num">{item['Composite Score']}</span>
+                                  <span className="score-denom">/100</span>
+                                </div>
+                                <div className="custom-tooltip">
+                                  <div className="tooltip-title">
+                                    <span>Composite Score: {item['Composite Score']}/100</span>
+                                    <span className={`score-badge ${getScoreClass(item['Composite Score'])}`} style={{ padding: '0.1rem 0.35rem', fontSize: '0.65rem' }}>
+                                      {getConvictionTier(item['Composite Score'])}
+                                    </span>
+                                  </div>
+                                  <div className="tooltip-body">
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 10px', marginTop: '4px' }}>
+                                      <div>Valuation: <strong style={{ color: '#38bdf8' }}>{pBreakdown.valuation}/25</strong></div>
+                                      <div>Quality: <strong style={{ color: '#34d399' }}>{pBreakdown.quality}/35</strong></div>
+                                      <div>Moat: <strong style={{ color: '#a78bfa' }}>{pBreakdown.moat}/15</strong></div>
+                                      <div>Momentum: <strong style={{ color: '#f59e0b' }}>{pBreakdown.momentum}/25</strong></div>
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
                             ) : '-'}
                           </td>
@@ -1524,13 +1587,19 @@ const paginatedStocks = pageSize === -1
                           </td>
                         )}
                         <td className="text-center" onClick={(e) => e.stopPropagation()}>
-                          <button 
-                            className="delete-btn" 
-                            title="Remove ticker"
-                            onClick={() => setDeleteConfirmStock(item)}
-                          >
-                            <i className="fa-solid fa-trash-can"></i>
-                          </button>
+                          <div className="tooltip-wrapper tooltip-align-right">
+                            <button 
+                              className="delete-btn" 
+                              onClick={() => setDeleteConfirmStock(item)}
+                            >
+                              <i className="fa-solid fa-trash-can"></i>
+                            </button>
+                            <div className="custom-tooltip">
+                              <div className="tooltip-body" style={{ whiteSpace: 'nowrap' }}>
+                                Remove {item.Ticker}
+                              </div>
+                            </div>
+                          </div>
                         </td>
                       </tr>
                     );
