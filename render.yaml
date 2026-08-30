@@ -9,7 +9,7 @@ services:
       - key: PYTHON_VERSION
         value: 3.10.12
       - key: DATABASE_URL
-        value: postgresql://postgres.vjjoheppyhqrlqplheog:[YOUR-PASSWORD]@aws-0-ca-central-1.pooler.supabase.com:5432/postgres
+        value: postgresql://[user]:[password]@ep-[project-id].[region].aws.neon.tech/neondb?sslmode=require
       # Add this so python stdout logs print in real-time
       - key: PYTHONUNBUFFERED
         value: "true"
