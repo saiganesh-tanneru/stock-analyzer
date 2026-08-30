@@ -301,6 +301,92 @@ def get_scrape_status():
     return jsonify(scrape_status)
 
 
+@app.route('/api/db/seed', methods=['GET', 'POST'])
+def seed_db():
+    if not db.is_db_enabled():
+        return jsonify({'error': 'Database is not enabled (running in CSV fallback mode)'}), 400
+        
+    conn = None
+    try:
+        conn = db.get_connection()
+        cur = conn.cursor()
+        
+        # 1. Seed tickers
+        cur.execute("SELECT COUNT(*) FROM tickers;")
+        tickers_count = cur.fetchone()[0]
+        tickers_seeded = 0
+        if tickers_count == 0:
+            if os.path.exists('tickers.csv'):
+                with open('tickers.csv', newline='') as f:
+                    reader = csv.reader(f)
+                    header = next(reader, None)  # skip header
+                    for row in reader:
+                        if row:
+                            symbol = row[0].strip().upper()
+                            name = row[1].strip() if len(row) > 1 else ''
+                            if symbol and symbol != 'SYMBOL':
+                                cur.execute("""
+                                    INSERT INTO tickers (symbol, name)
+                                    VALUES (%s, %s)
+                                    ON CONFLICT (symbol) DO NOTHING;
+                                """, (symbol, name))
+                                tickers_seeded += 1
+                conn.commit()
+                
+        # 2. Seed stocks
+        cur.execute("SELECT COUNT(*) FROM stocks;")
+        stocks_count = cur.fetchone()[0]
+        stocks_seeded = 0
+        if stocks_count == 0:
+            if os.path.exists('stocks_data.csv'):
+                df = pd.read_csv('stocks_data.csv').fillna('')
+                stocks_list = df.to_dict(orient='records')
+                for s in stocks_list:
+                    ticker = s.get('Ticker', s.get('symbol', '')).strip().upper()
+                    if not ticker:
+                        continue
+                    name = s.get('Name', '')
+                    sector = s.get('Sector', '')
+                    comp_score = s.get('Composite Score', None)
+                    if comp_score is not None and comp_score != '' and comp_score != '-':
+                        try:
+                            comp_score = int(float(str(comp_score).replace('%', '')))
+                        except:
+                            comp_score = None
+                    else:
+                        comp_score = None
+                    
+                    # Convert dict keys to match database expectations
+                    data_json = json.dumps(s)
+                    cur.execute("""
+                        INSERT INTO stocks (ticker, name, sector, composite_score, data)
+                        VALUES (%s, %s, %s, %s, %s)
+                        ON CONFLICT (ticker) DO NOTHING;
+                    """, (ticker, name, sector, comp_score, data_json))
+                    stocks_seeded += 1
+                conn.commit()
+                
+        return jsonify({
+            'status': 'success',
+            'message': 'Database seeded successfully',
+            'tickers_in_db_before': tickers_count,
+            'tickers_seeded_now': tickers_seeded,
+            'stocks_in_db_before': stocks_count,
+            'stocks_seeded_now': stocks_seeded
+        })
+    except Exception as e:
+        import traceback
+        if conn:
+            conn.rollback()
+        return jsonify({
+            'status': 'error',
+            'error': str(e),
+            'traceback': traceback.format_exc()
+        }), 500
+    finally:
+        if conn:
+            conn.close()
+
 @app.route('/api/tradingview/refresh', methods=['POST'])
 def refresh_tradingview():
     """Quick-refresh real-time TradingView technicals and analyst targets for all stocks in ~300ms."""
