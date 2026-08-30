@@ -1,12 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
-import progressbar
 import re
 import time
 import random
 from datetime import datetime
-import pygsheets
 import csv
 import json
 from curl_cffi import requests as curl_requests
@@ -14,11 +12,19 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import tradingview_service
 import db
 
-# set Google Sheets variables
+# Optional progressbar
 try:
+    import progressbar
+except ImportError:
+    progressbar = None
+
+# Optional Google Sheets integration
+try:
+    import pygsheets
     import user_specific_variables
     has_gsheets = True
 except ImportError:
+    pygsheets = None
     has_gsheets = False
 
 CONFIG_SYMBOLS = []
