@@ -64,69 +64,63 @@ def init_db():
         # Commit schema creation first
         conn.commit()
         
-        # 1. Seed tickers if table is empty
-        cur.execute("SELECT COUNT(*) FROM tickers;")
-        tickers_count = cur.fetchone()[0]
-        if tickers_count == 0:
-            print("Tickers table is empty. Seeding default tickers from tickers.csv...")
-            if os.path.exists(TICKERS_CSV):
-                try:
-                    with open(TICKERS_CSV, newline='') as f:
-                        reader = csv.reader(f)
-                        header = next(reader, None)  # skip header
-                        for row in reader:
-                            if row:
-                                symbol = row[0].strip().upper()
-                                name = row[1].strip() if len(row) > 1 else ''
-                                if symbol and symbol != 'SYMBOL':
-                                    cur.execute("""
-                                        INSERT INTO tickers (symbol, name)
-                                        VALUES (%s, %s)
-                                        ON CONFLICT (symbol) DO NOTHING;
-                                    """, (symbol, name))
-                    conn.commit()
-                    print("Default tickers seeded successfully.")
-                except Exception as seed_err:
-                    print(f"Error seeding tickers: {seed_err}")
-                    conn.rollback()
+        # 1. Seed tickers (upsert missing default tickers)
+        print("Seeding default tickers from tickers.csv...")
+        if os.path.exists(TICKERS_CSV):
+            try:
+                with open(TICKERS_CSV, newline='') as f:
+                    reader = csv.reader(f)
+                    header = next(reader, None)  # skip header
+                    for row in reader:
+                        if row:
+                            symbol = row[0].strip().upper()
+                            name = row[1].strip() if len(row) > 1 else ''
+                            if symbol and symbol != 'SYMBOL':
+                                cur.execute("""
+                                    INSERT INTO tickers (symbol, name)
+                                    VALUES (%s, %s)
+                                    ON CONFLICT (symbol) DO NOTHING;
+                                """, (symbol, name))
+                conn.commit()
+                print("Default tickers check/seeding complete.")
+            except Exception as seed_err:
+                print(f"Error seeding tickers: {seed_err}")
+                conn.rollback()
 
-        # 2. Seed stocks if table is empty
-        cur.execute("SELECT COUNT(*) FROM stocks;")
-        stocks_count = cur.fetchone()[0]
-        if stocks_count == 0:
-            print("Stocks table is empty. Seeding default stocks from stocks_data.csv...")
-            if os.path.exists(STOCKS_CSV):
-                try:
-                    import pandas as pd
-                    df = pd.read_csv(STOCKS_CSV).fillna('')
-                    stocks_list = df.to_dict(orient='records')
-                    
-                    for s in stocks_list:
-                        ticker = s.get('Ticker', s.get('symbol', '')).strip().upper()
-                        if not ticker:
-                            continue
-                        name = s.get('Name', '')
-                        sector = s.get('Sector', '')
-                        comp_score = s.get('Composite Score', None)
-                        if comp_score is not None and comp_score != '' and comp_score != '-':
-                            try:
-                                comp_score = int(float(str(comp_score).replace('%', '')))
-                            except:
-                                comp_score = None
-                        else:
+        # 2. Seed stocks (upsert missing default stock records)
+        print("Seeding default stocks from stocks_data.csv...")
+        if os.path.exists(STOCKS_CSV):
+            try:
+                import pandas as pd
+                df = pd.read_csv(STOCKS_CSV).fillna('')
+                stocks_list = df.to_dict(orient='records')
+                
+                for s in stocks_list:
+                    ticker = s.get('Ticker', s.get('symbol', '')).strip().upper()
+                    if not ticker:
+                        continue
+                    name = s.get('Name', '')
+                    sector = s.get('Sector', '')
+                    comp_score = s.get('Composite Score', None)
+                    if comp_score is not None and comp_score != '' and comp_score != '-':
+                        try:
+                            comp_score = int(float(str(comp_score).replace('%', '')))
+                        except:
                             comp_score = None
-                        
-                        data_json = json.dumps(s)
-                        cur.execute("""
-                            INSERT INTO stocks (ticker, name, sector, composite_score, data)
-                            VALUES (%s, %s, %s, %s, %s)
-                            ON CONFLICT (ticker) DO NOTHING;
-                        """, (ticker, name, sector, comp_score, data_json))
-                    conn.commit()
-                    print("Default stocks seeded successfully.")
-                except Exception as seed_err:
-                    print(f"Error seeding stocks: {seed_err}")
-                    conn.rollback()
+                    else:
+                        comp_score = None
+                    
+                    data_json = json.dumps(s)
+                    cur.execute("""
+                        INSERT INTO stocks (ticker, name, sector, composite_score, data)
+                        VALUES (%s, %s, %s, %s, %s)
+                        ON CONFLICT (ticker) DO NOTHING;
+                    """, (ticker, name, sector, comp_score, data_json))
+                conn.commit()
+                print("Default stocks check/seeding complete.")
+            except Exception as seed_err:
+                print(f"Error seeding stocks: {seed_err}")
+                conn.rollback()
 
         print("Database initialized successfully.")
     except Exception as e:
