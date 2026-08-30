@@ -1548,19 +1548,15 @@ const paginatedStocks = pageSize === -1
                                   <div className="custom-tooltip">
                                     <div className="tooltip-title">
                                       <i className="fa-solid fa-triangle-exclamation" style={{ color: 'var(--warning)' }}></i>
-                                      Partial Financial Data
+                                      GuruFocus Details Pending
                                     </div>
                                     <div className="tooltip-body">
-                                      {missingList.length > 0 ? (
-                                        <>
-                                          <div style={{ color: '#e2e8f0', marginBottom: '4px' }}>Missing metrics:</div>
-                                          <div style={{ color: '#fbbf24', fontSize: '0.72rem', lineHeight: '1.4' }}>
-                                            {missingList.join(' • ')}
-                                          </div>
-                                        </>
-                                      ) : (
-                                        <p style={{ margin: 0 }}>Some fundamental metrics are incomplete.</p>
-                                      )}
+                                      <p style={{ margin: '0 0 4px 0', fontSize: '0.78rem', color: '#e2e8f0' }}>
+                                        GuruFocus metrics ({missingList.join(', ') || 'GF Value, F-Score, Z-Score'}) require server-side Python scraping.
+                                      </p>
+                                      <span style={{ fontSize: '0.7rem', color: '#fbbf24' }}>
+                                        Run GitHub Actions "Stock Scraper" or local ./start.sh to populate full GF metrics.
+                                      </span>
                                     </div>
                                   </div>
                                 </div>
@@ -1775,6 +1771,31 @@ const paginatedStocks = pageSize === -1
                 <i className="fa-solid fa-xmark"></i>
               </button>
             </div>
+
+            {/* GuruFocus Pending Scrape Banner */}
+            {(selectedStock._pendingGF || !selectedStock['GF Value'] || selectedStock['GF Value'] === '-') && (
+              <div style={{
+                background: 'rgba(245, 158, 11, 0.08)',
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+                borderRadius: '8px',
+                padding: '0.75rem 1.25rem',
+                margin: '1rem 1.5rem 0',
+                fontSize: '0.82rem',
+                color: '#fbbf24',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '0.75rem'
+              }}>
+                <i className="fa-solid fa-triangle-exclamation" style={{ fontSize: '1rem', marginTop: '2px' }}></i>
+                <div>
+                  <div style={{ fontWeight: 600, marginBottom: '0.2rem' }}>GuruFocus Details Pending Scrape for {selectedStock.Ticker}</div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: 1.4 }}>
+                    GuruFocus metrics (GF Value, Piotroski F-Score, Altman Z-Score, WACC) cannot be scraped in-browser due to third-party Cloudflare TLS antibot protections.
+                    To populate verified GuruFocus data, trigger the <strong>Run Stock Scraper</strong> workflow on GitHub Actions or launch locally via <code>./start.sh</code>.
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* 4 Navigation Tabs */}
             <div className="modal-tabs">
@@ -2239,6 +2260,25 @@ const paginatedStocks = pageSize === -1
                       <i className="fa-solid fa-circle-exclamation"></i> {addError}
                     </div>
                   )}
+
+                  <div style={{
+                    background: 'rgba(59, 130, 246, 0.08)',
+                    border: '1px solid rgba(59, 130, 246, 0.25)',
+                    borderRadius: '8px',
+                    padding: '0.75rem 1rem',
+                    marginBottom: '1rem',
+                    fontSize: '0.8rem',
+                    lineHeight: 1.5,
+                    color: 'var(--text-secondary)'
+                  }}>
+                    <div style={{ fontWeight: 600, color: '#60a5fa', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <i className="fa-solid fa-cloud-arrow-up"></i> Live Market Lookup &amp; GuruFocus Notice
+                    </div>
+                    <div>
+                      Adding tickers retrieves real-time prices, ratios &amp; analyst targets directly from TradingView.
+                      <strong>GuruFocus metrics</strong> (GF Value, F-Score, Z-Score, WACC) require server-side Python scraping via GitHub Actions cloud workflow or <code>./start.sh</code>.
+                    </div>
+                  </div>
 
                   <div className="form-group">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
