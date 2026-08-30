@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { fetchLiveStockDetails } from './utils/liveStockService';
 
 // Helper to parse strings to numbers for sorting
 const parseNumber = (val) => {
@@ -344,32 +345,31 @@ export default function App() {
 
     // In Demo Mode (or on GitHub Pages static deployment)
     if (isDemo || window.location.hostname.includes('github.io')) {
-      const newItems = [];
-      const newTickers = [];
-      symbols.forEach(sym => {
-        if (!tickers.some(t => (t.symbol || '').toUpperCase() === sym)) {
-          newTickers.push({ symbol: sym, name: sym });
-          newItems.push({
-            Ticker: sym,
-            Name: `${sym} (Demo Tracked)`,
-            Sector: 'General',
-            'Composite Score': '50',
-            Price: '100.00',
-            _pending: true
-          });
+      setIsAdding(true);
+      setAddError('');
+      try {
+        const uniqueSymbols = symbols.filter(sym => !tickers.some(t => (t.symbol || '').toUpperCase() === sym));
+        if (uniqueSymbols.length === 0) {
+          addToast("Entered ticker(s) already in your watchlist.", "warning");
+          setIsAddOpen(false);
+          setNewTickerSymbol('');
+          return;
         }
-      });
 
-      if (newItems.length > 0) {
+        const liveStocks = await fetchLiveStockDetails(uniqueSymbols);
+        const newTickers = liveStocks.map(s => ({ symbol: s.Ticker, name: s.Name }));
+
         setTickers(prev => [...prev, ...newTickers]);
-        setStocks(prev => [...newItems, ...prev]);
-        addToast(`Added ${newItems.map(i => i.Ticker).join(', ')} to watchlist (Session view in Demo Mode).`, 'info');
-      } else {
-        addToast("Entered ticker(s) already in your watchlist.", "warning");
+        setStocks(prev => [...liveStocks, ...prev]);
+        addToast(`✅ Added ${liveStocks.map(i => i.Ticker).join(', ')} with live GF scores & metrics!`, 'success');
+        setIsAddOpen(false);
+        setNewTickerSymbol('');
+      } catch (err) {
+        console.error("Error adding demo ticker:", err);
+        setAddError("Failed to fetch live stock data.");
+      } finally {
+        setIsAdding(false);
       }
-
-      setIsAddOpen(false);
-      setNewTickerSymbol('');
       return;
     }
 
@@ -393,7 +393,8 @@ export default function App() {
         // Refresh ticker/stock lists
         const [tickersRes, stocksRes] = await Promise.all([fetch('/api/tickers'), fetch('/api/stocks')]);
         setTickers(await tickersRes.json());
-        setStocks(await stocksRes.json());
+        const serverStocks = await stocksRes.json();
+        setStocks(serverStocks);
         setIsAddOpen(false);
         setNewTickerSymbol('');
 
@@ -405,12 +406,22 @@ export default function App() {
         const toastType = data.added?.length > 0 ? 'success' : 'warning';
         addToast(parts.join('  |  ') || data.message, toastType);
 
-        // Scraping runs in the background — show a follow-up info toast
+        // Optimistically enrich any pending stubs with live data right away
         if (data.added?.length) {
-          setTimeout(() => addToast(
-            `Scraping metrics for ${data.added.length} new stock${data.added.length > 1 ? 's' : ''} in the background…`,
-            'info'
-          ), 600);
+          fetchLiveStockDetails(data.added).then(liveEnriched => {
+            if (liveEnriched && liveEnriched.length > 0) {
+              setStocks(prev => {
+                const liveMap = Object.fromEntries(liveEnriched.map(s => [s.Ticker.toUpperCase(), s]));
+                return prev.map(s => {
+                  const sym = (s.Ticker || s.symbol || '').toUpperCase();
+                  if (liveMap[sym] && (s._pending || !s['Piotroski F-Score'] || s['Piotroski F-Score'] === '-')) {
+                    return { ...s, ...liveMap[sym], _pending: false };
+                  }
+                  return s;
+                });
+              });
+            }
+          }).catch(console.error);
         }
 
       } else {
@@ -434,7 +445,22 @@ export default function App() {
           setTickers(await tickersRes.json());
           setIsAddOpen(false);
           setNewTickerSymbol('');
-          addToast(`${symbol} added & being scraped in the background!`, 'success');
+          addToast(`${symbol} added & live metrics loaded!`, 'success');
+
+          // Optimistically enrich with live GF metrics while backend scraper finishes
+          fetchLiveStockDetails([symbol]).then(liveEnriched => {
+            if (liveEnriched && liveEnriched.length > 0) {
+              setStocks(prev => {
+                const liveItem = liveEnriched[0];
+                return prev.map(s => {
+                  if ((s.Ticker || '').toUpperCase() === symbol) {
+                    return { ...s, ...liveItem, _pending: false };
+                  }
+                  return s;
+                });
+              });
+            }
+          }).catch(console.error);
         } else {
           setAddError(data.error || 'Failed to add ticker');
         }
