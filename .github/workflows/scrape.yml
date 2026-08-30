@@ -1,0 +1,60 @@
+name: Run Stock Scraper
+
+on:
+  schedule:
+    # Run daily at 04:00 UTC (11:00 PM EST / 8:00 PM PST, after market close)
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+    # Allow manual execution via the "Run workflow" button in GitHub Actions UI
+
+# Permissions required to commit and push updated data back to the repository
+permissions:
+  contents: write
+
+concurrency:
+  group: "scraper"
+  cancel-in-progress: true
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Fetch full history to avoid issues pushing back
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas beautifulsoup4 requests curl_cffi
+
+      - name: Run Scraper
+        # This will read tickers.csv and save output to stocks_data.csv
+        run: python Finviz-Scraper.py
+
+      - name: Generate static JSON data
+        # This compiles the CSV data into JSON files for the static frontend
+        run: python generate_static_data.py
+
+      - name: Commit and push updated data
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Stage CSV and JSON files
+          git add stocks_data.csv stocks_data.html frontend/public/api/
+          
+          # Commit only if changes exist
+          if git diff --staged --quiet; then
+            echo "No changes in stock data detected. Skipping commit."
+          else
+            git commit -m "data: scheduled update of stock scraper data"
+            git push
+          fi
