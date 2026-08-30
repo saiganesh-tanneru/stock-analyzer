@@ -637,11 +637,22 @@ const paginatedStocks = pageSize === -1
     : sortedStocks.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   // Stats
-  const totalTickersCount = tickers.length;
-  const scrapedCount = stocks.length;
-  const sectorCount = sectors.length;
-  const trapCount = stocks.filter(s => s['GF Valuation'] && s['GF Valuation'].includes('Value Trap')).length;
-  const undervaluedCount = stocks.filter(s => s['GF Valuation'] && s['GF Valuation'].includes('Undervalued')).length;
+  const totalTrackedCount = stocks.length;
+  const isFiltered = Boolean(
+    searchQuery.trim() || 
+    selectedSector || 
+    selectedValuation || 
+    selectedScoreFilter || 
+    selectedTVFilter || 
+    selectedConvictionFilter
+  );
+  const activeDataset = isFiltered ? filteredStocks : stocks;
+  const matchingCount = sortedStocks.length;
+
+  const activeSectors = [...new Set(activeDataset.map(s => s.Sector).filter(Boolean))].sort();
+  const sectorCount = activeSectors.length;
+  const trapCount = activeDataset.filter(s => s['GF Valuation'] && s['GF Valuation'].includes('Value Trap')).length;
+  const undervaluedCount = activeDataset.filter(s => s['GF Valuation'] && s['GF Valuation'].includes('Undervalued')).length;
 
   // Watchlist Pulse analytics (Top Gainers & High-Conviction Dips)
   const topGainers = useMemo(() => {
@@ -1056,7 +1067,7 @@ const paginatedStocks = pageSize === -1
         
         <div className="header-actions">
           <div className="last-updated">
-            <i className="fa-solid fa-clock-rotate-left mr-2"></i> {totalTickersCount} Tickers Tracked
+            <i className="fa-solid fa-clock-rotate-left mr-2"></i> {isFiltered ? `${matchingCount} of ${totalTrackedCount} Tickers` : `${totalTrackedCount} Tickers Tracked`}
           </div>
           <button 
             className="btn btn-primary" 
@@ -1122,8 +1133,9 @@ const paginatedStocks = pageSize === -1
             <i className="fa-solid fa-list-check"></i>
           </div>
           <div className="card-content">
-            <h3>Total Tickers</h3>
-            <div className="card-value">{totalTickersCount}</div>
+            <h3>{isFiltered ? 'Matching Tickers' : 'Total Tickers'}</h3>
+            <div className="card-value">{isFiltered ? matchingCount : totalTrackedCount}</div>
+            {isFiltered && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>of {totalTrackedCount} total</div>}
           </div>
         </div>
 
@@ -1134,6 +1146,7 @@ const paginatedStocks = pageSize === -1
           <div className="card-content">
             <h3>Undervalued Stocks</h3>
             <div className="card-value">{undervaluedCount}</div>
+            {isFiltered && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>in filtered view</div>}
           </div>
         </div>
 
@@ -1144,6 +1157,7 @@ const paginatedStocks = pageSize === -1
           <div className="card-content">
             <h3>Value Traps</h3>
             <div className="card-value">{trapCount}</div>
+            {isFiltered && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>in filtered view</div>}
           </div>
         </div>
 
@@ -1154,6 +1168,7 @@ const paginatedStocks = pageSize === -1
           <div className="card-content">
             <h3>Sectors Tracked</h3>
             <div className="card-value">{sectorCount}</div>
+            {isFiltered && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>in filtered view</div>}
           </div>
         </div>
       </div>
@@ -1306,6 +1321,25 @@ const paginatedStocks = pageSize === -1
             </div>
           )}
         </div>
+
+        {isFiltered && (
+          <button 
+            type="button" 
+            className="btn btn-secondary"
+            onClick={() => {
+              setSearchQuery('');
+              setSelectedSector('');
+              setSelectedValuation('');
+              setSelectedScoreFilter('');
+              setSelectedTVFilter('');
+              setSelectedConvictionFilter('');
+            }}
+            title="Reset all search and filter dropdowns"
+            style={{ color: '#fbbf24', borderColor: 'rgba(245, 158, 11, 0.4)' }}
+          >
+            <i className="fa-solid fa-rotate-left"></i> Reset Filters
+          </button>
+        )}
       </div>
 
       {/* Table Section */}
@@ -1640,9 +1674,9 @@ const paginatedStocks = pageSize === -1
           {sortedStocks.length > 0 && (
             <div className="pagination-container">
               <div>
-                Showing {pageSize === -1 ? 1 : (currentPage - 1) * pageSize + 1} to{' '}
+                Showing {sortedStocks.length === 0 ? 0 : (pageSize === -1 ? 1 : (currentPage - 1) * pageSize + 1)} to{' '}
                 {pageSize === -1 ? sortedStocks.length : Math.min(currentPage * pageSize, sortedStocks.length)} of{' '}
-                {sortedStocks.length} entries
+                {isFiltered ? `${sortedStocks.length} matching stocks (filtered from ${totalTrackedCount} total)` : `${sortedStocks.length} stocks`}
               </div>
               <div className="pagination-controls">
                 <span style={{ marginRight: '1rem' }}>Rows per page:</span>
