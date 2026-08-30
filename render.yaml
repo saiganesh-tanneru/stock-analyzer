@@ -3,7 +3,7 @@ services:
     name: stock-analyzer-portal
     env: python
     plan: free
-    buildCommand: "pip install -r requirements.txt && npm run build --prefix frontend"
+    buildCommand: "pip install -r requirements.txt && npm install --prefix frontend && npm run build --prefix frontend"
     startCommand: "gunicorn app:app"
     envVars:
       - key: PYTHON_VERSION
