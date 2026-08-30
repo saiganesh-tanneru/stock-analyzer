@@ -7,6 +7,8 @@ import threading
 import requests
 from bs4 import BeautifulSoup
 
+import json
+
 # Import scraping logic from existing scraper script
 import importlib
 FinvizScraper = importlib.import_module("Finviz-Scraper")
