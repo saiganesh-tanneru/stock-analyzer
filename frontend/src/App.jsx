@@ -37,8 +37,8 @@ const valuationRanks = {
 export default function App() {
   const [stocks, setStocks] = useState([]);
   const [tickers, setTickers] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [scrapeStatus, setScrapeStatus] = useState({ running: false, progress: 0, total: 0, message: 'Idle' });
+  const [isDemo, setIsDemo] = useState(false);
   
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -117,11 +117,18 @@ export default function App() {
   // Fetch initial data
   const fetchData = async () => {
     try {
+      // 1. Try real API endpoints first
       const [stocksRes, tickersRes, statusRes] = await Promise.all([
         fetch('/api/stocks'),
         fetch('/api/tickers'),
         fetch('/api/scrape/status')
       ]);
+      
+      const ctS = stocksRes.headers.get('content-type');
+      if (ctS && ctS.includes('text/html')) {
+        throw new Error("API returned HTML instead of JSON (likely dev server fallback)");
+      }
+      
       const stocksData = await stocksRes.json();
       const tickersData = await tickersRes.json();
       const statusData = await statusRes.json();
@@ -129,8 +136,28 @@ export default function App() {
       setStocks(stocksData);
       setTickers(tickersData);
       setScrapeStatus(statusData);
+      setIsDemo(false);
     } catch (err) {
-      console.error("Error fetching data:", err);
+      console.warn("API endpoints failed, falling back to static files (Demo Mode):", err);
+      try {
+        // Fallback to static JSON files in public/api/
+        const [stocksRes, tickersRes, statusRes] = await Promise.all([
+          fetch('api/stocks.json'),
+          fetch('api/tickers.json'),
+          fetch('api/status.json')
+        ]);
+        
+        const stocksData = await stocksRes.json();
+        const tickersData = await tickersRes.json();
+        const statusData = await statusRes.json();
+        
+        setStocks(stocksData);
+        setTickers(tickersData);
+        setScrapeStatus(statusData);
+        setIsDemo(true);
+      } catch (fallbackErr) {
+        console.error("Fallback static files also failed:", fallbackErr);
+      }
     } finally {
       setLoading(false);
     }
@@ -144,13 +171,39 @@ export default function App() {
     setOverviewLoading(true);
     setOverviewData(null);
     try {
-      const res = await fetch(`/api/overview/${symbol}`);
-      const data = await res.json();
-      if (!data.error) {
+      if (isDemo || window.location.hostname.includes('github.io')) {
+        // Try to fetch static overview file if it exists, otherwise fall back
+        const res = await fetch(`api/overview/${symbol}.json`);
+        if (!res.ok) throw new Error("Static file not found");
+        const data = await res.json();
         setOverviewData(data);
+      } else {
+        const res = await fetch(`/api/overview/${symbol}`);
+        const data = await res.json();
+        if (!data.error) {
+          setOverviewData(data);
+        }
       }
     } catch (e) {
-      console.error('Error fetching overview:', e);
+      // Construct fallback description from stock item
+      const stock = stocks.find(s => s.Ticker === symbol);
+      if (stock) {
+        setOverviewData({
+          symbol: symbol,
+          description: "Detailed description is not available in the read-only static demo. To view live descriptions and profiles, run the application locally with the Python backend server.",
+          moat: stock.Moat || '',
+          moat_score: null,
+          moat_label: stock.Moat ? `${stock.Moat} Moat` : 'Not available',
+          gf_score: stock['GF Score'] || null,
+          gf_value: stock['GF Value'] || null,
+          wacc: stock['WACC'] || null,
+          meta: {
+            employees: stock['Employees'] || 'N/A',
+            ipo_date: stock['IPO'] || 'N/A',
+            indices: stock['Index'] ? [stock['Index']] : []
+          }
+        });
+      }
     } finally {
       setOverviewLoading(false);
     }
@@ -160,13 +213,27 @@ export default function App() {
     setNewsLoading(true);
     setNewsData([]);
     try {
-      const res = await fetch(`/api/news/${symbol}?limit=10`);
-      const data = await res.json();
-      if (data.news) {
-        setNewsData(data.news);
+      if (isDemo || window.location.hostname.includes('github.io')) {
+        const res = await fetch(`api/news/${symbol}.json`);
+        if (!res.ok) throw new Error("Static file not found");
+        const data = await res.json();
+        setNewsData(data.news || []);
+      } else {
+        const res = await fetch(`/api/news/${symbol}?limit=10`);
+        const data = await res.json();
+        if (data.news) {
+          setNewsData(data.news);
+        }
       }
     } catch (e) {
-      console.error('Error fetching news:', e);
+      setNewsData([
+        {
+          title: "Live breaking news headlines are only available in the live application mode.",
+          source: "System",
+          time: "Now",
+          url: "#"
+        }
+      ]);
     } finally {
       setNewsLoading(false);
     }
@@ -182,7 +249,7 @@ export default function App() {
   // Poll status if scrape is running
   useEffect(() => {
     let interval = null;
-    if (scrapeStatus.running) {
+    if (scrapeStatus.running && !isDemo) {
       interval = setInterval(async () => {
         try {
           const res = await fetch('/api/scrape/status');
@@ -203,7 +270,7 @@ export default function App() {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [scrapeStatus.running]);
+  }, [scrapeStatus.running, isDemo]);
 
   // Click outside listener to close column toggle dropdown
   useEffect(() => {
@@ -222,6 +289,10 @@ export default function App() {
   }, [searchQuery, selectedSector, selectedValuation, selectedScoreFilter, selectedTVFilter, selectedConvictionFilter, pageSize]);
 
   const triggerFullScrape = async () => {
+    if (isDemo) {
+      addToast("Full scraping is disabled in Read-only Demo Mode.", "warning");
+      return;
+    }
     try {
       const res = await fetch('/api/scrape', { method: 'POST' });
       const data = await res.json();
@@ -237,6 +308,10 @@ export default function App() {
   };
 
   const handleRefreshTradingView = async () => {
+    if (isDemo) {
+      addToast("TradingView refresh is disabled in Read-only Demo Mode.", "warning");
+      return;
+    }
     setIsTVRefreshing(true);
     try {
       const res = await fetch('/api/tradingview/refresh', { method: 'POST' });
@@ -258,6 +333,10 @@ export default function App() {
 
   const handleAddTicker = async (e) => {
     e.preventDefault();
+    if (isDemo) {
+      addToast("Adding tickers is disabled in Read-only Demo Mode.", "warning");
+      return;
+    }
     const raw = newTickerSymbol.trim();
     if (!raw) return;
 
@@ -340,6 +419,11 @@ export default function App() {
   };
 
   const handleDeleteTicker = async () => {
+    if (isDemo) {
+      addToast("Deleting tickers is disabled in Read-only Demo Mode.", "warning");
+      setDeleteConfirmStock(null);
+      return;
+    }
     if (!deleteConfirmStock) return;
     const { Ticker } = deleteConfirmStock;
     try {
@@ -952,6 +1036,19 @@ const paginatedStocks = pageSize === -1
           </button>
         </div>
       </header>
+
+      {/* Demo Mode Banner */}
+      {isDemo && (
+        <div className="notification-banner demo" style={{ marginBottom: '1.5rem', backgroundColor: 'rgba(59, 130, 246, 0.08)', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
+          <div className="d-flex align-items-center gap-2">
+            <i className="fa-solid fa-circle-info text-info"></i>
+            <span><strong>Read-only Demo Mode:</strong> You are viewing a static copy of the dashboard hosted on GitHub Pages. Backend scraping and modification actions are disabled.</span>
+          </div>
+          <div className="last-updated">
+            <span className="badge badge-info" style={{ backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>Static Data</span>
+          </div>
+        </div>
+      )}
 
       {/* Scrape Progress Banner */}
       {scrapeStatus.running && (
