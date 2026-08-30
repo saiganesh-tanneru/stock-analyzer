@@ -269,8 +269,8 @@ def delete_ticker(symbol):
         try:
             conn = get_connection()
             cur = conn.cursor()
-            cur.execute("DELETE FROM tickers WHERE symbol = %s", (symbol,))
-            cur.execute("DELETE FROM stocks WHERE ticker = %s", (symbol,))
+            cur.execute("DELETE FROM tickers WHERE UPPER(TRIM(symbol)) = %s", (symbol,))
+            cur.execute("DELETE FROM stocks WHERE UPPER(TRIM(ticker)) = %s", (symbol,))
             conn.commit()
             return True
         except Exception as e:
@@ -284,9 +284,7 @@ def delete_ticker(symbol):
     else:
         # Fallback to CSV
         tickers = load_tickers()
-        updated_tickers = [t for t in tickers if t['symbol'] != symbol]
-        if len(updated_tickers) == len(tickers):
-            return False
+        updated_tickers = [t for t in tickers if t['symbol'].strip().upper() != symbol]
         
         try:
             with open(TICKERS_CSV, 'w', newline='') as f:
@@ -295,7 +293,7 @@ def delete_ticker(symbol):
                 for t in updated_tickers:
                     writer.writerow([t['symbol'], t['name']])
         except Exception as e:
-            print(f"CSV Error deleting ticker: {e}")
+            print(f"CSV Error deleting ticker from tickers.csv: {e}")
             return False
             
         # Also remove from stocks_data.csv
@@ -303,10 +301,11 @@ def delete_ticker(symbol):
             try:
                 import pandas as pd
                 df = pd.read_csv(STOCKS_CSV)
-                df = df[df['Ticker'] != symbol]
-                df.to_csv(STOCKS_CSV, index=False)
+                if 'Ticker' in df.columns:
+                    df = df[df['Ticker'].astype(str).str.strip().str.upper() != symbol]
+                    df.to_csv(STOCKS_CSV, index=False)
             except Exception as e:
-                print(f"CSV Error deleting stock record: {e}")
+                print(f"CSV Error deleting stock record from stocks_data.csv: {e}")
         return True
 
 # ==============================================================================

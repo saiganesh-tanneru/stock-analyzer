@@ -77,8 +77,8 @@ export default function App() {
   const [newTickerSymbol, setNewTickerSymbol] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [addError, setAddError] = useState('');
-  const [addWarning, setAddWarning] = useState('');
   const [deleteConfirmStock, setDeleteConfirmStock] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Multi-stock compare state
   const [selectedCompare, setSelectedCompare] = useState([]);
@@ -420,28 +420,45 @@ export default function App() {
   };
 
   const handleDeleteTicker = async () => {
-    if (isDemo) {
-      addToast("Deleting tickers is disabled in Read-only Demo Mode.", "warning");
+    if (!deleteConfirmStock) return;
+    const symbol = (deleteConfirmStock.Ticker || deleteConfirmStock.symbol || '').trim().toUpperCase();
+    if (!symbol) return;
+
+    if (isDemo || window.location.hostname.includes('github.io')) {
+      setStocks(prev => prev.filter(s => (s.Ticker || s.symbol || '').trim().toUpperCase() !== symbol));
+      setTickers(prev => prev.filter(t => (t.symbol || '').trim().toUpperCase() !== symbol));
+      setSelectedCompare(prev => prev.filter(t => t !== symbol));
+      if (selectedStock && (selectedStock.Ticker === symbol || selectedStock.symbol === symbol)) {
+        setSelectedStock(null);
+      }
       setDeleteConfirmStock(null);
+      addToast(`Removed ${symbol} from current view (Demo Mode).`, 'info');
       return;
     }
-    if (!deleteConfirmStock) return;
-    const { Ticker } = deleteConfirmStock;
+
+    setIsDeleting(true);
     try {
-      const res = await fetch(`/api/tickers/${Ticker}`, { method: 'DELETE' });
+      const res = await fetch(`/api/tickers/${symbol}`, { method: 'DELETE' });
       const data = await res.json();
       if (res.ok) {
         setStocks(data);
         const tickersRes = await fetch('/api/tickers');
         const tickersData = await tickersRes.json();
         setTickers(tickersData);
+        setSelectedCompare(prev => prev.filter(t => t !== symbol));
+        if (selectedStock && (selectedStock.Ticker === symbol || selectedStock.symbol === symbol)) {
+          setSelectedStock(null);
+        }
         setDeleteConfirmStock(null);
+        addToast(`Successfully removed ${symbol}.`, 'success');
       } else {
-        alert(data.error || 'Failed to delete ticker');
+        addToast(data.error || 'Failed to delete ticker', 'warning');
       }
     } catch (err) {
       console.error("Error deleting ticker:", err);
-      alert("Failed to delete ticker due to connection error");
+      addToast("Failed to delete ticker due to connection error", 'warning');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -2013,6 +2030,13 @@ const paginatedStocks = pageSize === -1
               >
                 <i className="fa-solid fa-arrow-up-right-from-square"></i> TradingView
               </a>
+              <button 
+                className="btn btn-danger" 
+                onClick={() => setDeleteConfirmStock(selectedStock)}
+                style={{ marginRight: 'auto' }}
+              >
+                <i className="fa-solid fa-trash-can"></i> Remove
+              </button>
               <button className="btn btn-primary" onClick={() => setSelectedStock(null)}>
                 Close Details
               </button>
@@ -2125,6 +2149,81 @@ const paginatedStocks = pageSize === -1
           </div>
         );
       })()}
+
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmStock && (
+        <div className="modal-overlay" onClick={() => !isDeleting && setDeleteConfirmStock(null)}>
+          <div className="modal-container" style={{ maxWidth: '460px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-title-desc">
+                <h2>
+                  <i className="fa-solid fa-trash-can" style={{ color: 'var(--danger)', marginRight: '0.5rem' }}></i>
+                  Remove Ticker
+                </h2>
+                <p>Confirm ticker removal from your watchlist</p>
+              </div>
+              <button 
+                className="modal-close-btn" 
+                onClick={() => !isDeleting && setDeleteConfirmStock(null)} 
+                disabled={isDeleting}
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', marginBottom: '1.25rem', border: '1px solid var(--border-color)' }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: '8px', backgroundColor: 'rgba(239, 68, 68, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--danger)', fontSize: '1.25rem', flexShrink: 0 }}>
+                  <i className="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--text-primary)' }}>
+                    {deleteConfirmStock.Ticker || deleteConfirmStock.symbol}
+                  </div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    {deleteConfirmStock.Name || deleteConfirmStock.name || 'Stock Watchlist Item'}
+                  </div>
+                </div>
+              </div>
+
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: '1.5', margin: '0 0 0.5rem 0' }}>
+                Are you sure you want to remove <strong>{deleteConfirmStock.Ticker || deleteConfirmStock.symbol}</strong>?
+              </p>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
+                This ticker and its cached metrics will be removed from your dashboard. You can re-add it anytime using the <strong>Add Ticker</strong> button.
+              </p>
+            </div>
+
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setDeleteConfirmStock(null)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={handleDeleteTicker}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <i className="fa-solid fa-spinner fa-spin"></i> Removing...
+                  </>
+                ) : (
+                  <>
+                    <i className="fa-solid fa-trash-can"></i> Remove Ticker
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
 
 

@@ -238,8 +238,12 @@ def add_tickers_bulk():
 def delete_ticker(symbol):
     symbol = symbol.strip().upper()
     tickers = db.load_tickers()
+    stocks = db.load_stocks()
     
-    if not any(t['symbol'] == symbol for t in tickers):
+    in_tickers = any(t['symbol'].strip().upper() == symbol for t in tickers)
+    in_stocks = any(str(s.get('Ticker', '')).strip().upper() == symbol for s in stocks)
+    
+    if not in_tickers and not in_stocks:
         return jsonify({'error': f'Ticker {symbol} not found'}), 404
         
     db.delete_ticker(symbol)
