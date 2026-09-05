@@ -1,0 +1,564 @@
+{
+  "symbol": "NEE",
+  "name": "NextEra Energy Inc",
+  "sector": "Utilities",
+  "sub_sector": "Utilities - Regulated Electric",
+  "country": "USA",
+  "current_price": 83.43,
+  "market_cap": 174030000000.0,
+  "shares_outstanding": 2089999999.9999998,
+  "beta": 0.63,
+  "wacc": 6.3,
+  "gf_value": 82.0,
+  "gf_valuation": "Fairly Valued",
+  "analyst_target": 102.0,
+  "average_thesis_fair_value": 10.2,
+  "closest_to_stock_oracle": "Thesis 2 (Academic DFCF-20 + TV)",
+  "thesis_1": {
+    "model_name": "Thesis 1: Adam Khoo VMI Core Model",
+    "short_name": "Adam Khoo VMI",
+    "document_source": "stock-oracle-blueprint.md",
+    "intrinsic_value": 0.0,
+    "margin_of_safety_pct": -100.0,
+    "price_to_iv": 999.0,
+    "signal": "Significantly Overvalued",
+    "signal_badge": "danger",
+    "buy_under_30_pct": 0.0,
+    "buy_under_20_pct": 0.0,
+    "starting_metric_name": "Operating Cash Flow",
+    "starting_metric_value": 3809763572.6795096,
+    "discount_rate": 0.05,
+    "discount_rate_pct": 5.0,
+    "discount_rate_reason": "Beta < 0.80 -> 5.0% (Stable/Defensive)",
+    "beta_used": 0.63,
+    "growth_years_1_5": 0.087,
+    "growth_years_6_10": 0.06525,
+    "growth_years_11_20": 0.04,
+    "operational_pv": 91023923041.33875,
+    "operational_pv_per_share": 43.55,
+    "cash_per_share": 1.54,
+    "debt_per_share": 52.86,
+    "net_debt_adj_per_share": -51.32,
+    "equity_value": -16240519958.66124,
+    "shares_outstanding": 2089999999.9999998,
+    "projections": [
+      {
+        "year": 1,
+        "projected_metric": 4141213003.502627,
+        "growth_rate": 0.087,
+        "discount_factor": 0.9523809523809523,
+        "present_value": 3944012384.2882156,
+        "cumulative_pv": 3944012384.2882156
+      },
+      {
+        "year": 2,
+        "projected_metric": 4501498534.807355,
+        "growth_rate": 0.087,
+        "discount_factor": 0.9070294784580498,
+        "present_value": 4082991868.3059907,
+        "cumulative_pv": 8027004252.594206
+      },
+      {
+        "year": 3,
+        "projected_metric": 4893128907.335594,
+        "growth_rate": 0.087,
+        "discount_factor": 0.863837598531476,
+        "present_value": 4226868724.617725,
+        "cumulative_pv": 12253872977.211931
+      },
+      {
+        "year": 4,
+        "projected_metric": 5318831122.27379,
+        "growth_rate": 0.087,
+        "discount_factor": 0.8227024747918819,
+        "present_value": 4375815527.294729,
+        "cumulative_pv": 16629688504.50666
+      },
+      {
+        "year": 5,
+        "projected_metric": 5781569429.91161,
+        "growth_rate": 0.087,
+        "discount_factor": 0.7835261664684589,
+        "present_value": 4530010931.589876,
+        "cumulative_pv": 21159699436.096535
+      },
+      {
+        "year": 6,
+        "projected_metric": 6158816835.213343,
+        "growth_rate": 0.06525,
+        "discount_factor": 0.7462153966366274,
+        "present_value": 4595803947.501062,
+        "cumulative_pv": 25755503383.597595
+      },
+      {
+        "year": 7,
+        "projected_metric": 6560679633.711014,
+        "growth_rate": 0.06525,
+        "discount_factor": 0.7106813301301214,
+        "present_value": 4662552528.643341,
+        "cumulative_pv": 30418055912.240936
+      },
+      {
+        "year": 8,
+        "projected_metric": 6988763979.8106575,
+        "growth_rate": 0.06525,
+        "discount_factor": 0.676839362028687,
+        "present_value": 4730270553.464113,
+        "cumulative_pv": 35148326465.70505
+      },
+      {
+        "year": 9,
+        "projected_metric": 7444780829.493303,
+        "growth_rate": 0.06525,
+        "discount_factor": 0.6446089162177971,
+        "present_value": 4798972101.978711,
+        "cumulative_pv": 39947298567.68376
+      },
+      {
+        "year": 10,
+        "projected_metric": 7930552778.617742,
+        "growth_rate": 0.06525,
+        "discount_factor": 0.6139132535407591,
+        "present_value": 4868671458.697926,
+        "cumulative_pv": 44815970026.38168
+      },
+      {
+        "year": 11,
+        "projected_metric": 8247774889.762451,
+        "growth_rate": 0.04,
+        "discount_factor": 0.5846792890864373,
+        "present_value": 4822303159.091279,
+        "cumulative_pv": 49638273185.47296
+      },
+      {
+        "year": 12,
+        "projected_metric": 8577685885.352949,
+        "growth_rate": 0.04,
+        "discount_factor": 0.5568374181775593,
+        "present_value": 4776376462.338028,
+        "cumulative_pv": 54414649647.81099
+      },
+      {
+        "year": 13,
+        "projected_metric": 8920793320.767067,
+        "growth_rate": 0.04,
+        "discount_factor": 0.5303213506452945,
+        "present_value": 4730887162.6967125,
+        "cumulative_pv": 59145536810.507706
+      },
+      {
+        "year": 14,
+        "projected_metric": 9277625053.59775,
+        "growth_rate": 0.04,
+        "discount_factor": 0.5050679529955185,
+        "present_value": 4685831094.480554,
+        "cumulative_pv": 63831367904.98826
+      },
+      {
+        "year": 15,
+        "projected_metric": 9648730055.74166,
+        "growth_rate": 0.04,
+        "discount_factor": 0.48101709809097,
+        "present_value": 4641204131.675976,
+        "cumulative_pv": 68472572036.66423
+      },
+      {
+        "year": 16,
+        "projected_metric": 10034679257.971325,
+        "growth_rate": 0.04,
+        "discount_factor": 0.45811152199140004,
+        "present_value": 4597002187.564776,
+        "cumulative_pv": 73069574224.229
+      },
+      {
+        "year": 17,
+        "projected_metric": 10436066428.290178,
+        "growth_rate": 0.04,
+        "discount_factor": 0.4362966876108571,
+        "present_value": 4553221214.349874,
+        "cumulative_pv": 77622795438.57887
+      },
+      {
+        "year": 18,
+        "projected_metric": 10853509085.421785,
+        "growth_rate": 0.04,
+        "discount_factor": 0.415520654867483,
+        "present_value": 4509857202.7846365,
+        "cumulative_pv": 82132652641.36351
+      },
+      {
+        "year": 19,
+        "projected_metric": 11287649448.838657,
+        "growth_rate": 0.04,
+        "discount_factor": 0.39573395701665043,
+        "present_value": 4466906181.805736,
+        "cumulative_pv": 86599558823.16925
+      },
+      {
+        "year": 20,
+        "projected_metric": 11739155426.792204,
+        "growth_rate": 0.04,
+        "discount_factor": 0.3768894828730004,
+        "present_value": 4424364218.16949,
+        "cumulative_pv": 91023923041.33875
+      }
+    ],
+    "quality_checklist": [
+      {
+        "id": 1,
+        "name": "Consistent Earnings Growth",
+        "passed": true,
+        "desc": "EPS growth / profitability positive (Income: $9.30B)"
+      },
+      {
+        "id": 2,
+        "name": "Consistent Sales Growth",
+        "passed": true,
+        "desc": "Sales: $28.08B"
+      },
+      {
+        "id": 3,
+        "name": "Operating Cash Flow Quality",
+        "passed": true,
+        "desc": "Operating Margin: 26.8%"
+      },
+      {
+        "id": 4,
+        "name": "High Return on Equity (ROE >= 12%)",
+        "passed": true,
+        "desc": "ROE: 17.2% (Target: >=12%)"
+      },
+      {
+        "id": 5,
+        "name": "High Return on Invested Capital (ROIC >= 10%)",
+        "passed": true,
+        "desc": "ROIC: 378.0% (Target: >=10%)"
+      },
+      {
+        "id": 6,
+        "name": "Conservative Debt (<3.5x Net Profit)",
+        "passed": false,
+        "desc": "Debt/Profit: 11.9x, D/E: 1.93"
+      },
+      {
+        "id": 7,
+        "name": "Durable Economic Moat",
+        "passed": true,
+        "desc": "ROIC (378.0%) vs WACC (6.3%), GM: 35.8%"
+      }
+    ],
+    "quality_score": "6/7"
+  },
+  "thesis_2": {
+    "model_name": "Thesis 2: Academic DFCF-20 + Gordon Perpetuity + Composite",
+    "short_name": "Academic DFCF-20 + TV",
+    "document_source": "stockoracle_valuation_blueprint.md",
+    "intrinsic_value": 10.2,
+    "composite_fair_value": 29.72,
+    "margin_of_safety_pct": -717.9,
+    "composite_mos_pct": -180.7,
+    "signal": "Overvalued",
+    "signal_badge": "danger",
+    "base_fcf": 3047810858.1436076,
+    "discount_rate": 0.07350000000000001,
+    "discount_rate_pct": 7.35,
+    "terminal_growth": 0.04,
+    "terminal_growth_pct": 4.0,
+    "pv_forecast": 58004785363.66881,
+    "terminal_value_20": 291551561644.5109,
+    "pv_terminal_value": 70578820549.24033,
+    "tv_contribution_pct": 54.9,
+    "enterprise_value": 128583605912.90913,
+    "equity_value": 21319162912.90915,
+    "shares_outstanding": 2089999999.9999998,
+    "multi_model_suite": {
+      "dcf_no_tv": -23.57,
+      "dfcf_with_tv": 10.2,
+      "dni_earnings": 15.42,
+      "fair_pe": 97.89,
+      "fair_ps": 51.05,
+      "fair_pb": 109.56,
+      "composite_oracle_style": 29.72,
+      "weights": {
+        "dcf": 0.25,
+        "dfcf": 0.25,
+        "dni": 0.15,
+        "pe": 0.15,
+        "ps": 0.1,
+        "pb": 0.1
+      }
+    },
+    "sensitivity_matrix": [
+      {
+        "discount_rate": 5.85,
+        "values": [
+          {
+            "terminal_growth": 3.0,
+            "intrinsic_value": 32.78
+          },
+          {
+            "terminal_growth": 4.0,
+            "intrinsic_value": 61.72
+          },
+          {
+            "terminal_growth": 5.0,
+            "intrinsic_value": 158.74
+          }
+        ]
+      },
+      {
+        "discount_rate": 7.35,
+        "values": [
+          {
+            "terminal_growth": 3.0,
+            "intrinsic_value": 2.19
+          },
+          {
+            "terminal_growth": 4.0,
+            "intrinsic_value": 10.2
+          },
+          {
+            "terminal_growth": 5.0,
+            "intrinsic_value": 25.03
+          }
+        ]
+      },
+      {
+        "discount_rate": 8.85,
+        "values": [
+          {
+            "terminal_growth": 3.0,
+            "intrinsic_value": 0.0
+          },
+          {
+            "terminal_growth": 4.0,
+            "intrinsic_value": 0.0
+          },
+          {
+            "terminal_growth": 5.0,
+            "intrinsic_value": 0.0
+          }
+        ]
+      }
+    ],
+    "projections": [
+      {
+        "year": 1,
+        "projected_fcf": 3312970402.8021016,
+        "growth_rate": 0.087,
+        "discount_factor": 0.9315323707498835,
+        "present_value": 3086139173.546438,
+        "cumulative_pv": 3086139173.546438
+      },
+      {
+        "year": 2,
+        "projected_fcf": 3601198827.845884,
+        "growth_rate": 0.087,
+        "discount_factor": 0.8677525577548983,
+        "present_value": 3124949493.8472075,
+        "cumulative_pv": 6211088667.393646
+      },
+      {
+        "year": 3,
+        "projected_fcf": 3914503125.868476,
+        "growth_rate": 0.087,
+        "discount_factor": 0.8083395973496955,
+        "present_value": 3164247880.5886483,
+        "cumulative_pv": 9375336547.982294
+      },
+      {
+        "year": 4,
+        "projected_fcf": 4255064897.819033,
+        "growth_rate": 0.087,
+        "discount_factor": 0.7529945014901681,
+        "present_value": 3204040471.541556,
+        "cumulative_pv": 12579377019.52385
+      },
+      {
+        "year": 5,
+        "projected_fcf": 4625255543.929289,
+        "growth_rate": 0.087,
+        "discount_factor": 0.701438753134763,
+        "present_value": 3244333481.6634107,
+        "cumulative_pv": 15823710501.18726
+      },
+      {
+        "year": 6,
+        "projected_fcf": 4927053468.170675,
+        "growth_rate": 0.06525,
+        "discount_factor": 0.653412904643468,
+        "present_value": 3219400317.9710736,
+        "cumulative_pv": 19043110819.158333
+      },
+      {
+        "year": 7,
+        "projected_fcf": 5248543706.968812,
+        "growth_rate": 0.06525,
+        "discount_factor": 0.6086752721410973,
+        "present_value": 3194658769.1836853,
+        "cumulative_pv": 22237769588.34202
+      },
+      {
+        "year": 8,
+        "projected_fcf": 5591011183.848527,
+        "growth_rate": 0.06525,
+        "discount_factor": 0.5670007192744269,
+        "present_value": 3170107362.7134795,
+        "cumulative_pv": 25407876951.055496
+      },
+      {
+        "year": 9,
+        "projected_fcf": 5955824663.594644,
+        "growth_rate": 0.06525,
+        "discount_factor": 0.528179524242596,
+        "present_value": 3145744637.289738,
+        "cumulative_pv": 28553621588.345234
+      },
+      {
+        "year": 10,
+        "projected_fcf": 6344442222.894194,
+        "growth_rate": 0.06525,
+        "discount_factor": 0.492016324399251,
+        "present_value": 3121569142.8718147,
+        "cumulative_pv": 31675190731.21705
+      },
+      {
+        "year": 11,
+        "projected_fcf": 6598219911.809961,
+        "growth_rate": 0.04,
+        "discount_factor": 0.458329133115278,
+        "present_value": 3024156412.283826,
+        "cumulative_pv": 34699347143.50088
+      },
+      {
+        "year": 12,
+        "projected_fcf": 6862148708.282361,
+        "growth_rate": 0.04,
+        "discount_factor": 0.4269484239546138,
+        "present_value": 2929783575.9433427,
+        "cumulative_pv": 37629130719.44422
+      },
+      {
+        "year": 13,
+        "projected_fcf": 7136634656.613655,
+        "growth_rate": 0.04,
+        "discount_factor": 0.3977162775543677,
+        "present_value": 2838355769.893876,
+        "cumulative_pv": 40467486489.3381
+      },
+      {
+        "year": 14,
+        "projected_fcf": 7422100042.8782015,
+        "growth_rate": 0.04,
+        "discount_factor": 0.37048558691603883,
+        "present_value": 2749781090.5352874,
+        "cumulative_pv": 43217267579.87338
+      },
+      {
+        "year": 15,
+        "projected_fcf": 7718984044.593329,
+        "growth_rate": 0.04,
+        "discount_factor": 0.3451193171085597,
+        "present_value": 2663970502.241918,
+        "cumulative_pv": 45881238082.1153
+      },
+      {
+        "year": 16,
+        "projected_fcf": 8027743406.377064,
+        "growth_rate": 0.04,
+        "discount_factor": 0.3214898156577174,
+        "present_value": 2580837747.8636184,
+        "cumulative_pv": 48462075829.97892
+      },
+      {
+        "year": 17,
+        "projected_fcf": 8348853142.632146,
+        "growth_rate": 0.04,
+        "discount_factor": 0.2994781701515765,
+        "present_value": 2500299262.019714,
+        "cumulative_pv": 50962375091.998634
+      },
+      {
+        "year": 18,
+        "projected_fcf": 8682807268.337431,
+        "growth_rate": 0.04,
+        "discount_factor": 0.27897360982913505,
+        "present_value": 2422274087.0987444,
+        "cumulative_pv": 53384649179.09738
+      },
+      {
+        "year": 19,
+        "projected_fcf": 9030119559.07093,
+        "growth_rate": 0.04,
+        "discount_factor": 0.25987294814078715,
+        "present_value": 2346683791.8795476,
+        "cumulative_pv": 55731332970.97693
+      },
+      {
+        "year": 20,
+        "projected_fcf": 9391324341.433767,
+        "growth_rate": 0.04,
+        "discount_factor": 0.24208006347534897,
+        "present_value": 2273452392.6918764,
+        "cumulative_pv": 58004785363.66881
+      }
+    ]
+  },
+  "thesis_3": {
+    "model_name": "Thesis 3: Dynamic Multi-Modal Routing & OracleIQ\u2122 6D Framework",
+    "short_name": "Dynamic Routing + OracleIQ",
+    "document_source": "A Comprehensive Blueprint for Algorithmic.md",
+    "intrinsic_value": 0.0,
+    "margin_of_safety_pct": -100.0,
+    "signal": "Overvalued",
+    "signal_badge": "danger",
+    "routing_type": "DFCF-20 (Median Deceleration Staging)",
+    "routing_rationale": "Standard operating enterprise. 3-epoch projection with median stepdown and hurdle rate floor.",
+    "routed_details": {
+      "base_metric": "Free Cash Flow (TTM)",
+      "base_value": 3047810858.1436076,
+      "near_term_g1": 0.087,
+      "median_mid_term_g2": 0.0635,
+      "terminal_g3": 0.04,
+      "discount_rate": 0.063,
+      "pv_total": 63711462604.97917
+    },
+    "oracle_iq": {
+      "total_score": 47.5,
+      "predictability": 70.0,
+      "profitability": 68.3,
+      "growth": 32.5,
+      "financial_strength": 35.4,
+      "oracle_moat": 77.2,
+      "valuation": 0.0
+    },
+    "momentum": {
+      "sma50": -0.0361,
+      "sma200": -0.0499,
+      "rsi": 41.06,
+      "stage_2_uptrend": false,
+      "signal": "Bearish Downtrend"
+    }
+  },
+  "raw_metrics": {
+    "pe": 18.72,
+    "forward_pe": 18.99,
+    "ps": 6.2,
+    "pb": 3.05,
+    "pfcf": 57.1,
+    "fcf": 3047810858.1436076,
+    "ocf": 3809763572.6795096,
+    "income": 9300000000.0,
+    "sales": 28080000000.0,
+    "total_cash": 3218599999.9999995,
+    "total_debt": 110483042999.99998,
+    "gross_margin": 0.358,
+    "oper_margin": 0.2676,
+    "profit_margin": 0.3312,
+    "roe": 0.1723,
+    "roic": 3.78,
+    "f_score": "5/9",
+    "z_score": 1.07,
+    "growth_g1": 0.087
+  }
+}

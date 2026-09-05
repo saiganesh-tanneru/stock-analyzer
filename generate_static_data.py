@@ -75,5 +75,29 @@ def generate_json():
         json.dump(status, f, indent=2)
     print(f"Saved status.json to {PUBLIC_API_DIR}")
 
+    # 4. Generate Oracle Analysis static data
+    try:
+        import stock_oracle_engine
+        oracle_dir = os.path.join(PUBLIC_API_DIR, 'oracle')
+        os.makedirs(oracle_dir, exist_ok=True)
+        
+        # Leaderboard
+        valid_stocks = [r for r in records if r.get('Ticker') and not r.get('_pending')]
+        leaderboard = stock_oracle_engine.generate_watchlist_oracle_leaderboard(valid_stocks)
+        with open(os.path.join(PUBLIC_API_DIR, 'oracle-analysis.json'), 'w') as f:
+            json.dump(leaderboard, f, indent=2)
+        print(f"Saved oracle-analysis.json to {PUBLIC_API_DIR}")
+        
+        # Individual stock oracle analyses
+        for stock in valid_stocks:
+            sym = stock.get('Ticker', '').strip().upper()
+            if sym:
+                analysis = stock_oracle_engine.analyze_stock_3_theses(stock)
+                with open(os.path.join(oracle_dir, f"{sym}.json"), 'w') as f:
+                    json.dump(analysis, f, indent=2)
+        print(f"Saved individual stock oracle analyses to {oracle_dir}")
+    except Exception as e:
+        print(f"Warning: Failed to generate static oracle data: {e}")
+
 if __name__ == '__main__':
     generate_json()

@@ -1,0 +1,1025 @@
+{
+  "symbol": "TXN",
+  "name": "Texas Instruments Inc",
+  "sector": "Technology",
+  "sub_sector": "Semiconductors",
+  "country": "USA",
+  "price": 258.44,
+  "market_cap": 236020000000.0,
+  "shares": 913000000.0,
+  "beta": 1.35,
+  "wacc": 15.78,
+  "gf_value": 233.0,
+  "analyst_target": 340.0,
+  "cash_per_share": 7.67,
+  "debt_per_share": 15.38,
+  "net_cash_debt_per_share": -7.71,
+  "base_cfo_per_share": 7.33,
+  "base_fcf_per_share": 5.87,
+  "base_eps_ex_nri": 6.57,
+  "revenue_per_share": 21.3,
+  "book_value": 19.72,
+  "rev_growth_pct": 16.7,
+  "eps_growth_pct": 30.2,
+  "assumptions": {
+    "g_years_1_5": 30.0,
+    "g_years_6_10": 19.5,
+    "g_years_11_20": 8.0,
+    "discount_rate": 9.0,
+    "terminal_growth": 2.5,
+    "tv_contribution_pct": 70.9
+  },
+  "models": {
+    "dcf_20": {
+      "id": "dcf_20",
+      "name": "DCF-20 (CFO-Based)",
+      "subtitle": "20-Year Discounted Operating Cash Flow",
+      "category": "Cash Flow Intrinsic",
+      "intrinsic_value": 440.49,
+      "margin_of_safety_pct": 41.3,
+      "signal": "Strong Buy",
+      "signal_badge": "strong-buy",
+      "pv_operating": 448.2,
+      "net_debt_adj": -7.71,
+      "best_for": "Capital-intensive or mature companies with predictable operating cash flows."
+    },
+    "dfcf_20": {
+      "id": "dfcf_20",
+      "name": "DFCF-20 (FCF-Based)",
+      "subtitle": "20-Year Discounted Free Cash Flow",
+      "category": "Cash Flow Intrinsic",
+      "intrinsic_value": 350.85,
+      "margin_of_safety_pct": 26.3,
+      "signal": "Strong Buy",
+      "signal_badge": "strong-buy",
+      "pv_operating": 358.56,
+      "net_debt_adj": -7.71,
+      "best_for": "High-performing, asset-light tech companies & disciplined manufacturing."
+    },
+    "dni_20": {
+      "id": "dni_20",
+      "name": "DNI-20 (Net Income-Based)",
+      "subtitle": "20-Year Discounted Accounting Earnings",
+      "category": "Earnings Intrinsic",
+      "intrinsic_value": 393.89,
+      "margin_of_safety_pct": 34.4,
+      "signal": "Strong Buy",
+      "signal_badge": "strong-buy",
+      "pv_operating": 401.6,
+      "net_debt_adj": -7.71,
+      "best_for": "Banks, insurance, financial institutions & regulated utilities."
+    },
+    "dfcf_terminal": {
+      "id": "dfcf_terminal",
+      "name": "DFCF Terminal Model",
+      "subtitle": "10-Year Explicit FCF + Gordon Perpetuity TV",
+      "category": "Hybrid Perpetuity",
+      "intrinsic_value": 491.2,
+      "margin_of_safety_pct": 47.4,
+      "signal": "Strong Buy",
+      "signal_badge": "strong-buy",
+      "pv_explicit_10": 145.37,
+      "pv_terminal_value": 353.54,
+      "tv_contribution_pct": 70.9,
+      "net_debt_adj": -7.71,
+      "best_for": "Growth companies transitioning to long-term mature market operators."
+    },
+    "stock_oracle_dcf": {
+      "id": "stock_oracle_dcf",
+      "name": "StockOracle\u2122 20-Yr Decay DCF",
+      "subtitle": "EPS 5-Yr Step Decay + Gordon Perpetuity TV",
+      "category": "StockOracle\u2122 Proprietary",
+      "intrinsic_value": 311.26,
+      "margin_of_safety_pct": 17.0,
+      "signal": "Modestly Undervalued",
+      "signal_badge": "undervalued",
+      "signal_color": "#34d399",
+      "pv_eps_sum": 170.93,
+      "pv_terminal_val": 140.33,
+      "terminal_value_pct": 45.1,
+      "base_growth_pct": 14.62,
+      "growth_decay_pct": 15.0,
+      "discount_rate_pct": 10.0,
+      "terminal_g_pct": 3.5,
+      "initial_eps": 6.57,
+      "year_20_eps": 59.29,
+      "base_case_val": 311.26,
+      "bull_case_val": 3026.8,
+      "best_for": "StockOracle\u2122 canonical 20-year EPS step-decay compounding methodology."
+    }
+  },
+  "multiples": {
+    "ps": {
+      "id": "ps",
+      "name": "Price-to-Sales (P/S)",
+      "value": 12.13,
+      "unit": "x",
+      "best_for": "High-growth unprofitable tech or cyclical companies in downturn."
+    },
+    "pe_ex_nri": {
+      "id": "pe_ex_nri",
+      "name": "P/E without NRI",
+      "value": 39.34,
+      "unit": "x",
+      "best_for": "Strips out one-off legal settlements, write-offs & non-operating noise."
+    },
+    "pb": {
+      "id": "pb",
+      "name": "Price-to-Book (P/B)",
+      "value": 13.11,
+      "unit": "x",
+      "best_for": "Asset-heavy industries, financial institutions & balance sheet strength."
+    },
+    "psg": {
+      "id": "psg",
+      "name": "Price-to-Sales Growth (PSG)",
+      "value": 0.73,
+      "unit": "ratio",
+      "status": "Undervalued",
+      "implied_fair_price": 354.91,
+      "margin_of_safety_pct": 27.2,
+      "benchmark_rule": "PSG < 1.0 indicates undervalued relative to top-line growth."
+    },
+    "peg_ex_nri": {
+      "id": "peg_ex_nri",
+      "name": "PEG without NRI",
+      "value": 1.3,
+      "unit": "ratio",
+      "status": "Fair",
+      "implied_fair_price": 198.61,
+      "margin_of_safety_pct": -30.1,
+      "benchmark_rule": "PEG < 1.0 indicates Peter Lynch growth-at-a-reasonable-price discount."
+    }
+  },
+  "industry_applicability": {
+    "sector_category": "Technology & SaaS",
+    "primary_models": [
+      "DFCF-20",
+      "PSG Value"
+    ],
+    "primary_intrinsic_model": "DFCF-20",
+    "primary_multiple": "PSG",
+    "rationale": "Fast growth with optical initial losses. PSG captures top-line scale, while DFCF captures cash flow potential once growth stabilizes.",
+    "badge_color": "indigo",
+    "recommended_intrinsic_value": 350.85,
+    "recommended_margin_of_safety": 26.3,
+    "recommended_signal": "Strong Buy",
+    "recommended_signal_badge": "strong-buy"
+  },
+  "consolidated_intrinsic_value": {
+    "value": 406.83,
+    "margin_of_safety_pct": 36.5,
+    "signal": "Strong Buy",
+    "signal_badge": "strong-buy",
+    "signal_color": "#10b981",
+    "upside_dollars": 148.39,
+    "upside_pct": 57.4,
+    "conservative_buy_target": 284.78,
+    "moderate_buy_target": 345.81,
+    "methodology_note": "Weighted on Free Cash Flow compounding (DFCF-20 & Terminal TV) combined with top-line growth (PSG), reflecting tech scalability.",
+    "contributions": [
+      {
+        "model_id": "dfcf_20",
+        "model_name": "DFCF-20 (Free Cash Flow)",
+        "weight_pct": 35.0,
+        "raw_value": 350.85,
+        "weighted_value": 122.8
+      },
+      {
+        "model_id": "dfcf_terminal",
+        "model_name": "DFCF Terminal Perpetuity",
+        "weight_pct": 30.0,
+        "raw_value": 491.2,
+        "weighted_value": 147.36
+      },
+      {
+        "model_id": "psg_implied",
+        "model_name": "PSG Growth Fair Value",
+        "weight_pct": 15.0,
+        "raw_value": 354.91,
+        "weighted_value": 53.24
+      },
+      {
+        "model_id": "dcf_20",
+        "model_name": "DCF-20 (Operating Cash Flow)",
+        "weight_pct": 10.0,
+        "raw_value": 440.49,
+        "weighted_value": 44.05
+      },
+      {
+        "model_id": "dni_20",
+        "model_name": "DNI-20 (Core Earnings)",
+        "weight_pct": 10.0,
+        "raw_value": 393.89,
+        "weighted_value": 39.39
+      }
+    ]
+  },
+  "composite_average": {
+    "average_intrinsic_value": 419.1,
+    "average_mos_pct": 38.3,
+    "signal": "Strong Buy",
+    "signal_badge": "strong-buy"
+  },
+  "stock_oracle_scenarios": {
+    "base_case": {
+      "intrinsic_value": 311.26,
+      "discounted_eps_sum": 170.93,
+      "discounted_terminal_value": 140.33,
+      "terminal_value_undiscounted": 944.06,
+      "terminal_value_pct": 45.1,
+      "initial_eps": 6.57,
+      "year_20_eps": 59.29,
+      "base_growth_pct": 14.62,
+      "growth_decay_pct": 15.0,
+      "discount_rate_pct": 10.0,
+      "terminal_g_pct": 3.5,
+      "margin_of_safety_pct": 17.0,
+      "signal": "Modestly Undervalued",
+      "signal_badge": "undervalued",
+      "signal_color": "#34d399",
+      "schedule": [
+        {
+          "year": 1,
+          "growth_rate_pct": 14.62,
+          "projected_eps": 7.53,
+          "discount_factor": 0.9091,
+          "pv_eps": 6.85,
+          "decay_step": false
+        },
+        {
+          "year": 2,
+          "growth_rate_pct": 14.62,
+          "projected_eps": 8.63,
+          "discount_factor": 0.8264,
+          "pv_eps": 7.13,
+          "decay_step": false
+        },
+        {
+          "year": 3,
+          "growth_rate_pct": 14.62,
+          "projected_eps": 9.89,
+          "discount_factor": 0.7513,
+          "pv_eps": 7.43,
+          "decay_step": false
+        },
+        {
+          "year": 4,
+          "growth_rate_pct": 14.62,
+          "projected_eps": 11.34,
+          "discount_factor": 0.683,
+          "pv_eps": 7.75,
+          "decay_step": false
+        },
+        {
+          "year": 5,
+          "growth_rate_pct": 14.62,
+          "projected_eps": 13.0,
+          "discount_factor": 0.6209,
+          "pv_eps": 8.07,
+          "decay_step": true
+        },
+        {
+          "year": 6,
+          "growth_rate_pct": 12.43,
+          "projected_eps": 14.61,
+          "discount_factor": 0.5645,
+          "pv_eps": 8.25,
+          "decay_step": false
+        },
+        {
+          "year": 7,
+          "growth_rate_pct": 12.43,
+          "projected_eps": 16.43,
+          "discount_factor": 0.5132,
+          "pv_eps": 8.43,
+          "decay_step": false
+        },
+        {
+          "year": 8,
+          "growth_rate_pct": 12.43,
+          "projected_eps": 18.47,
+          "discount_factor": 0.4665,
+          "pv_eps": 8.62,
+          "decay_step": false
+        },
+        {
+          "year": 9,
+          "growth_rate_pct": 12.43,
+          "projected_eps": 20.77,
+          "discount_factor": 0.4241,
+          "pv_eps": 8.81,
+          "decay_step": false
+        },
+        {
+          "year": 10,
+          "growth_rate_pct": 12.43,
+          "projected_eps": 23.35,
+          "discount_factor": 0.3855,
+          "pv_eps": 9.0,
+          "decay_step": true
+        },
+        {
+          "year": 11,
+          "growth_rate_pct": 10.56,
+          "projected_eps": 25.81,
+          "discount_factor": 0.3505,
+          "pv_eps": 9.05,
+          "decay_step": false
+        },
+        {
+          "year": 12,
+          "growth_rate_pct": 10.56,
+          "projected_eps": 28.54,
+          "discount_factor": 0.3186,
+          "pv_eps": 9.09,
+          "decay_step": false
+        },
+        {
+          "year": 13,
+          "growth_rate_pct": 10.56,
+          "projected_eps": 31.55,
+          "discount_factor": 0.2897,
+          "pv_eps": 9.14,
+          "decay_step": false
+        },
+        {
+          "year": 14,
+          "growth_rate_pct": 10.56,
+          "projected_eps": 34.89,
+          "discount_factor": 0.2633,
+          "pv_eps": 9.19,
+          "decay_step": false
+        },
+        {
+          "year": 15,
+          "growth_rate_pct": 10.56,
+          "projected_eps": 38.57,
+          "discount_factor": 0.2394,
+          "pv_eps": 9.23,
+          "decay_step": true
+        },
+        {
+          "year": 16,
+          "growth_rate_pct": 8.98,
+          "projected_eps": 42.03,
+          "discount_factor": 0.2176,
+          "pv_eps": 9.15,
+          "decay_step": false
+        },
+        {
+          "year": 17,
+          "growth_rate_pct": 8.98,
+          "projected_eps": 45.81,
+          "discount_factor": 0.1978,
+          "pv_eps": 9.06,
+          "decay_step": false
+        },
+        {
+          "year": 18,
+          "growth_rate_pct": 8.98,
+          "projected_eps": 49.92,
+          "discount_factor": 0.1799,
+          "pv_eps": 8.98,
+          "decay_step": false
+        },
+        {
+          "year": 19,
+          "growth_rate_pct": 8.98,
+          "projected_eps": 54.4,
+          "discount_factor": 0.1635,
+          "pv_eps": 8.9,
+          "decay_step": false
+        },
+        {
+          "year": 20,
+          "growth_rate_pct": 8.98,
+          "projected_eps": 59.29,
+          "discount_factor": 0.1486,
+          "pv_eps": 8.81,
+          "decay_step": true
+        }
+      ]
+    },
+    "bull_case": {
+      "intrinsic_value": 3026.8,
+      "discounted_eps_sum": 502.48,
+      "discounted_terminal_value": 2524.33,
+      "terminal_value_undiscounted": 8518.42,
+      "terminal_value_pct": 83.4,
+      "initial_eps": 6.57,
+      "year_20_eps": 185.93,
+      "base_growth_pct": 19.62,
+      "growth_decay_pct": 5.0,
+      "discount_rate_pct": 6.27,
+      "terminal_g_pct": 4.0,
+      "margin_of_safety_pct": 91.5,
+      "signal": "Strong Buy",
+      "signal_badge": "strong-buy",
+      "signal_color": "#10b981",
+      "schedule": [
+        {
+          "year": 1,
+          "growth_rate_pct": 19.62,
+          "projected_eps": 7.86,
+          "discount_factor": 0.941,
+          "pv_eps": 7.4,
+          "decay_step": false
+        },
+        {
+          "year": 2,
+          "growth_rate_pct": 19.62,
+          "projected_eps": 9.4,
+          "discount_factor": 0.8855,
+          "pv_eps": 8.32,
+          "decay_step": false
+        },
+        {
+          "year": 3,
+          "growth_rate_pct": 19.62,
+          "projected_eps": 11.25,
+          "discount_factor": 0.8332,
+          "pv_eps": 9.37,
+          "decay_step": false
+        },
+        {
+          "year": 4,
+          "growth_rate_pct": 19.62,
+          "projected_eps": 13.45,
+          "discount_factor": 0.7841,
+          "pv_eps": 10.55,
+          "decay_step": false
+        },
+        {
+          "year": 5,
+          "growth_rate_pct": 19.62,
+          "projected_eps": 16.09,
+          "discount_factor": 0.7378,
+          "pv_eps": 11.87,
+          "decay_step": true
+        },
+        {
+          "year": 6,
+          "growth_rate_pct": 18.64,
+          "projected_eps": 19.09,
+          "discount_factor": 0.6943,
+          "pv_eps": 13.25,
+          "decay_step": false
+        },
+        {
+          "year": 7,
+          "growth_rate_pct": 18.64,
+          "projected_eps": 22.65,
+          "discount_factor": 0.6533,
+          "pv_eps": 14.8,
+          "decay_step": false
+        },
+        {
+          "year": 8,
+          "growth_rate_pct": 18.64,
+          "projected_eps": 26.87,
+          "discount_factor": 0.6148,
+          "pv_eps": 16.52,
+          "decay_step": false
+        },
+        {
+          "year": 9,
+          "growth_rate_pct": 18.64,
+          "projected_eps": 31.88,
+          "discount_factor": 0.5785,
+          "pv_eps": 18.44,
+          "decay_step": false
+        },
+        {
+          "year": 10,
+          "growth_rate_pct": 18.64,
+          "projected_eps": 37.82,
+          "discount_factor": 0.5444,
+          "pv_eps": 20.59,
+          "decay_step": true
+        },
+        {
+          "year": 11,
+          "growth_rate_pct": 17.71,
+          "projected_eps": 44.52,
+          "discount_factor": 0.5123,
+          "pv_eps": 22.8,
+          "decay_step": false
+        },
+        {
+          "year": 12,
+          "growth_rate_pct": 17.71,
+          "projected_eps": 52.4,
+          "discount_factor": 0.482,
+          "pv_eps": 25.26,
+          "decay_step": false
+        },
+        {
+          "year": 13,
+          "growth_rate_pct": 17.71,
+          "projected_eps": 61.68,
+          "discount_factor": 0.4536,
+          "pv_eps": 27.98,
+          "decay_step": false
+        },
+        {
+          "year": 14,
+          "growth_rate_pct": 17.71,
+          "projected_eps": 72.6,
+          "discount_factor": 0.4268,
+          "pv_eps": 30.99,
+          "decay_step": false
+        },
+        {
+          "year": 15,
+          "growth_rate_pct": 17.71,
+          "projected_eps": 85.45,
+          "discount_factor": 0.4016,
+          "pv_eps": 34.32,
+          "decay_step": true
+        },
+        {
+          "year": 16,
+          "growth_rate_pct": 16.82,
+          "projected_eps": 99.83,
+          "discount_factor": 0.3779,
+          "pv_eps": 37.73,
+          "decay_step": false
+        },
+        {
+          "year": 17,
+          "growth_rate_pct": 16.82,
+          "projected_eps": 116.62,
+          "discount_factor": 0.3556,
+          "pv_eps": 41.48,
+          "decay_step": false
+        },
+        {
+          "year": 18,
+          "growth_rate_pct": 16.82,
+          "projected_eps": 136.24,
+          "discount_factor": 0.3347,
+          "pv_eps": 45.59,
+          "decay_step": false
+        },
+        {
+          "year": 19,
+          "growth_rate_pct": 16.82,
+          "projected_eps": 159.16,
+          "discount_factor": 0.3149,
+          "pv_eps": 50.12,
+          "decay_step": false
+        },
+        {
+          "year": 20,
+          "growth_rate_pct": 16.82,
+          "projected_eps": 185.93,
+          "discount_factor": 0.2963,
+          "pv_eps": 55.1,
+          "decay_step": true
+        }
+      ]
+    },
+    "custom_case": {
+      "intrinsic_value": 355.9,
+      "discounted_eps_sum": 189.07,
+      "discounted_terminal_value": 166.82,
+      "terminal_value_undiscounted": 934.94,
+      "terminal_value_pct": 46.9,
+      "initial_eps": 6.57,
+      "year_20_eps": 59.29,
+      "base_growth_pct": 14.62,
+      "growth_decay_pct": 15.0,
+      "discount_rate_pct": 9.0,
+      "terminal_g_pct": 2.5,
+      "margin_of_safety_pct": 27.4,
+      "signal": "Strong Buy",
+      "signal_badge": "strong-buy",
+      "signal_color": "#10b981",
+      "schedule": [
+        {
+          "year": 1,
+          "growth_rate_pct": 14.62,
+          "projected_eps": 7.53,
+          "discount_factor": 0.9174,
+          "pv_eps": 6.91,
+          "decay_step": false
+        },
+        {
+          "year": 2,
+          "growth_rate_pct": 14.62,
+          "projected_eps": 8.63,
+          "discount_factor": 0.8417,
+          "pv_eps": 7.26,
+          "decay_step": false
+        },
+        {
+          "year": 3,
+          "growth_rate_pct": 14.62,
+          "projected_eps": 9.89,
+          "discount_factor": 0.7722,
+          "pv_eps": 7.64,
+          "decay_step": false
+        },
+        {
+          "year": 4,
+          "growth_rate_pct": 14.62,
+          "projected_eps": 11.34,
+          "discount_factor": 0.7084,
+          "pv_eps": 8.03,
+          "decay_step": false
+        },
+        {
+          "year": 5,
+          "growth_rate_pct": 14.62,
+          "projected_eps": 13.0,
+          "discount_factor": 0.6499,
+          "pv_eps": 8.45,
+          "decay_step": true
+        },
+        {
+          "year": 6,
+          "growth_rate_pct": 12.43,
+          "projected_eps": 14.61,
+          "discount_factor": 0.5963,
+          "pv_eps": 8.71,
+          "decay_step": false
+        },
+        {
+          "year": 7,
+          "growth_rate_pct": 12.43,
+          "projected_eps": 16.43,
+          "discount_factor": 0.547,
+          "pv_eps": 8.99,
+          "decay_step": false
+        },
+        {
+          "year": 8,
+          "growth_rate_pct": 12.43,
+          "projected_eps": 18.47,
+          "discount_factor": 0.5019,
+          "pv_eps": 9.27,
+          "decay_step": false
+        },
+        {
+          "year": 9,
+          "growth_rate_pct": 12.43,
+          "projected_eps": 20.77,
+          "discount_factor": 0.4604,
+          "pv_eps": 9.56,
+          "decay_step": false
+        },
+        {
+          "year": 10,
+          "growth_rate_pct": 12.43,
+          "projected_eps": 23.35,
+          "discount_factor": 0.4224,
+          "pv_eps": 9.86,
+          "decay_step": true
+        },
+        {
+          "year": 11,
+          "growth_rate_pct": 10.56,
+          "projected_eps": 25.81,
+          "discount_factor": 0.3875,
+          "pv_eps": 10.0,
+          "decay_step": false
+        },
+        {
+          "year": 12,
+          "growth_rate_pct": 10.56,
+          "projected_eps": 28.54,
+          "discount_factor": 0.3555,
+          "pv_eps": 10.15,
+          "decay_step": false
+        },
+        {
+          "year": 13,
+          "growth_rate_pct": 10.56,
+          "projected_eps": 31.55,
+          "discount_factor": 0.3262,
+          "pv_eps": 10.29,
+          "decay_step": false
+        },
+        {
+          "year": 14,
+          "growth_rate_pct": 10.56,
+          "projected_eps": 34.89,
+          "discount_factor": 0.2992,
+          "pv_eps": 10.44,
+          "decay_step": false
+        },
+        {
+          "year": 15,
+          "growth_rate_pct": 10.56,
+          "projected_eps": 38.57,
+          "discount_factor": 0.2745,
+          "pv_eps": 10.59,
+          "decay_step": true
+        },
+        {
+          "year": 16,
+          "growth_rate_pct": 8.98,
+          "projected_eps": 42.03,
+          "discount_factor": 0.2519,
+          "pv_eps": 10.59,
+          "decay_step": false
+        },
+        {
+          "year": 17,
+          "growth_rate_pct": 8.98,
+          "projected_eps": 45.81,
+          "discount_factor": 0.2311,
+          "pv_eps": 10.59,
+          "decay_step": false
+        },
+        {
+          "year": 18,
+          "growth_rate_pct": 8.98,
+          "projected_eps": 49.92,
+          "discount_factor": 0.212,
+          "pv_eps": 10.58,
+          "decay_step": false
+        },
+        {
+          "year": 19,
+          "growth_rate_pct": 8.98,
+          "projected_eps": 54.4,
+          "discount_factor": 0.1945,
+          "pv_eps": 10.58,
+          "decay_step": false
+        },
+        {
+          "year": 20,
+          "growth_rate_pct": 8.98,
+          "projected_eps": 59.29,
+          "discount_factor": 0.1784,
+          "pv_eps": 10.58,
+          "decay_step": true
+        }
+      ]
+    }
+  },
+  "projection_schedule": [
+    {
+      "year": 1,
+      "stage": "Stage 1 (Years 1\u20135 High Growth)",
+      "growth_pct": 30.0,
+      "discount_factor": 0.9174,
+      "cfo": 9.53,
+      "pv_cfo": 8.75,
+      "fcf": 7.63,
+      "pv_fcf": 7.0,
+      "net_income": 8.54,
+      "pv_net_income": 7.84,
+      "cum_pv_fcf": 7.0
+    },
+    {
+      "year": 2,
+      "stage": "Stage 1 (Years 1\u20135 High Growth)",
+      "growth_pct": 30.0,
+      "discount_factor": 0.8417,
+      "cfo": 12.39,
+      "pv_cfo": 10.43,
+      "fcf": 9.91,
+      "pv_fcf": 8.34,
+      "net_income": 11.1,
+      "pv_net_income": 9.35,
+      "cum_pv_fcf": 15.34
+    },
+    {
+      "year": 3,
+      "stage": "Stage 1 (Years 1\u20135 High Growth)",
+      "growth_pct": 30.0,
+      "discount_factor": 0.7722,
+      "cfo": 16.11,
+      "pv_cfo": 12.44,
+      "fcf": 12.89,
+      "pv_fcf": 9.95,
+      "net_income": 14.43,
+      "pv_net_income": 11.15,
+      "cum_pv_fcf": 25.29
+    },
+    {
+      "year": 4,
+      "stage": "Stage 1 (Years 1\u20135 High Growth)",
+      "growth_pct": 30.0,
+      "discount_factor": 0.7084,
+      "cfo": 20.94,
+      "pv_cfo": 14.84,
+      "fcf": 16.75,
+      "pv_fcf": 11.87,
+      "net_income": 18.76,
+      "pv_net_income": 13.29,
+      "cum_pv_fcf": 37.16
+    },
+    {
+      "year": 5,
+      "stage": "Stage 1 (Years 1\u20135 High Growth)",
+      "growth_pct": 30.0,
+      "discount_factor": 0.6499,
+      "cfo": 27.22,
+      "pv_cfo": 17.69,
+      "fcf": 21.78,
+      "pv_fcf": 14.16,
+      "net_income": 24.39,
+      "pv_net_income": 15.85,
+      "cum_pv_fcf": 51.32
+    },
+    {
+      "year": 6,
+      "stage": "Stage 2 (Years 6\u201310 Transition)",
+      "growth_pct": 19.5,
+      "discount_factor": 0.5963,
+      "cfo": 32.53,
+      "pv_cfo": 19.4,
+      "fcf": 26.03,
+      "pv_fcf": 15.52,
+      "net_income": 29.15,
+      "pv_net_income": 17.38,
+      "cum_pv_fcf": 66.83
+    },
+    {
+      "year": 7,
+      "stage": "Stage 2 (Years 6\u201310 Transition)",
+      "growth_pct": 19.5,
+      "discount_factor": 0.547,
+      "cfo": 38.88,
+      "pv_cfo": 21.27,
+      "fcf": 31.1,
+      "pv_fcf": 17.01,
+      "net_income": 34.84,
+      "pv_net_income": 19.06,
+      "cum_pv_fcf": 83.85
+    },
+    {
+      "year": 8,
+      "stage": "Stage 2 (Years 6\u201310 Transition)",
+      "growth_pct": 19.5,
+      "discount_factor": 0.5019,
+      "cfo": 46.46,
+      "pv_cfo": 23.32,
+      "fcf": 37.17,
+      "pv_fcf": 18.65,
+      "net_income": 41.63,
+      "pv_net_income": 20.89,
+      "cum_pv_fcf": 102.5
+    },
+    {
+      "year": 9,
+      "stage": "Stage 2 (Years 6\u201310 Transition)",
+      "growth_pct": 19.5,
+      "discount_factor": 0.4604,
+      "cfo": 55.52,
+      "pv_cfo": 25.56,
+      "fcf": 44.41,
+      "pv_fcf": 20.45,
+      "net_income": 49.75,
+      "pv_net_income": 22.9,
+      "cum_pv_fcf": 122.95
+    },
+    {
+      "year": 10,
+      "stage": "Stage 2 (Years 6\u201310 Transition)",
+      "growth_pct": 19.5,
+      "discount_factor": 0.4224,
+      "cfo": 66.34,
+      "pv_cfo": 28.02,
+      "fcf": 53.08,
+      "pv_fcf": 22.42,
+      "net_income": 59.45,
+      "pv_net_income": 25.11,
+      "cum_pv_fcf": 145.37
+    },
+    {
+      "year": 11,
+      "stage": "Stage 3 (Years 11\u201320 Maturity)",
+      "growth_pct": 8.0,
+      "discount_factor": 0.3875,
+      "cfo": 71.65,
+      "pv_cfo": 27.77,
+      "fcf": 57.32,
+      "pv_fcf": 22.21,
+      "net_income": 64.2,
+      "pv_net_income": 24.88,
+      "cum_pv_fcf": 167.58
+    },
+    {
+      "year": 12,
+      "stage": "Stage 3 (Years 11\u201320 Maturity)",
+      "growth_pct": 8.0,
+      "discount_factor": 0.3555,
+      "cfo": 77.38,
+      "pv_cfo": 27.51,
+      "fcf": 61.91,
+      "pv_fcf": 22.01,
+      "net_income": 69.34,
+      "pv_net_income": 24.65,
+      "cum_pv_fcf": 189.59
+    },
+    {
+      "year": 13,
+      "stage": "Stage 3 (Years 11\u201320 Maturity)",
+      "growth_pct": 8.0,
+      "discount_factor": 0.3262,
+      "cfo": 83.57,
+      "pv_cfo": 27.26,
+      "fcf": 66.86,
+      "pv_fcf": 21.81,
+      "net_income": 74.88,
+      "pv_net_income": 24.43,
+      "cum_pv_fcf": 211.4
+    },
+    {
+      "year": 14,
+      "stage": "Stage 3 (Years 11\u201320 Maturity)",
+      "growth_pct": 8.0,
+      "discount_factor": 0.2992,
+      "cfo": 90.26,
+      "pv_cfo": 27.01,
+      "fcf": 72.21,
+      "pv_fcf": 21.61,
+      "net_income": 80.88,
+      "pv_net_income": 24.2,
+      "cum_pv_fcf": 233.01
+    },
+    {
+      "year": 15,
+      "stage": "Stage 3 (Years 11\u201320 Maturity)",
+      "growth_pct": 8.0,
+      "discount_factor": 0.2745,
+      "cfo": 97.48,
+      "pv_cfo": 26.76,
+      "fcf": 77.98,
+      "pv_fcf": 21.41,
+      "net_income": 87.35,
+      "pv_net_income": 23.98,
+      "cum_pv_fcf": 254.42
+    },
+    {
+      "year": 16,
+      "stage": "Stage 3 (Years 11\u201320 Maturity)",
+      "growth_pct": 8.0,
+      "discount_factor": 0.2519,
+      "cfo": 105.28,
+      "pv_cfo": 26.52,
+      "fcf": 84.22,
+      "pv_fcf": 21.21,
+      "net_income": 94.33,
+      "pv_net_income": 23.76,
+      "cum_pv_fcf": 275.63
+    },
+    {
+      "year": 17,
+      "stage": "Stage 3 (Years 11\u201320 Maturity)",
+      "growth_pct": 8.0,
+      "discount_factor": 0.2311,
+      "cfo": 113.7,
+      "pv_cfo": 26.27,
+      "fcf": 90.96,
+      "pv_fcf": 21.02,
+      "net_income": 101.88,
+      "pv_net_income": 23.54,
+      "cum_pv_fcf": 296.65
+    },
+    {
+      "year": 18,
+      "stage": "Stage 3 (Years 11\u201320 Maturity)",
+      "growth_pct": 8.0,
+      "discount_factor": 0.212,
+      "cfo": 122.8,
+      "pv_cfo": 26.03,
+      "fcf": 98.24,
+      "pv_fcf": 20.83,
+      "net_income": 110.03,
+      "pv_net_income": 23.33,
+      "cum_pv_fcf": 317.48
+    },
+    {
+      "year": 19,
+      "stage": "Stage 3 (Years 11\u201320 Maturity)",
+      "growth_pct": 8.0,
+      "discount_factor": 0.1945,
+      "cfo": 132.62,
+      "pv_cfo": 25.79,
+      "fcf": 106.1,
+      "pv_fcf": 20.63,
+      "net_income": 118.83,
+      "pv_net_income": 23.11,
+      "cum_pv_fcf": 338.11
+    },
+    {
+      "year": 20,
+      "stage": "Stage 3 (Years 11\u201320 Maturity)",
+      "growth_pct": 8.0,
+      "discount_factor": 0.1784,
+      "cfo": 143.23,
+      "pv_cfo": 25.56,
+      "fcf": 114.59,
+      "pv_fcf": 20.45,
+      "net_income": 128.34,
+      "pv_net_income": 22.9,
+      "cum_pv_fcf": 358.56
+    }
+  ]
+}

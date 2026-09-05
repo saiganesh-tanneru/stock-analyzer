@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import StockOracleView from './StockOracleView.jsx';
 
 // Helper to parse strings to numbers for sorting
 const parseNumber = (val) => {
@@ -40,7 +41,42 @@ export default function App() {
   const [scrapeStatus, setScrapeStatus] = useState({ running: false, progress: 0, total: 0, message: 'Idle' });
   const [isDemo, setIsDemo] = useState(false);
   const [loading, setLoading] = useState(true);
-  
+
+  // Application Top-Level Routing state ('screener' | 'oracle')
+  const [currentRoute, setCurrentRoute] = useState('screener');
+  const [oracleSelectedTicker, setOracleSelectedTicker] = useState('MSFT');
+
+  // URL Hash routing listener
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash || '';
+      if (hash.startsWith('#/oracle')) {
+        setCurrentRoute('oracle');
+        const parts = hash.split('/');
+        if (parts.length > 2 && parts[2]) {
+          setOracleSelectedTicker(parts[2].toUpperCase());
+        }
+      } else {
+        setCurrentRoute('screener');
+      }
+    };
+
+    handleHashChange();
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  const navigateToRoute = (route, ticker = null) => {
+    setCurrentRoute(route);
+    if (route === 'oracle') {
+      const sym = ticker || oracleSelectedTicker || 'MSFT';
+      setOracleSelectedTicker(sym);
+      window.location.hash = `#/oracle/${sym}`;
+    } else {
+      window.location.hash = '#/';
+    }
+  };
+
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSector, setSelectedSector] = useState('');
@@ -49,7 +85,7 @@ export default function App() {
   const [selectedTVFilter, setSelectedTVFilter] = useState('');
   const [selectedConvictionFilter, setSelectedConvictionFilter] = useState('');
   const [isTVRefreshing, setIsTVRefreshing] = useState(false);
-  
+
   // Sorting state
   const [sortKey, setSortKey] = useState('Ticker');
   const [sortDirection, setSortDirection] = useState('asc');
@@ -64,7 +100,7 @@ export default function App() {
   ]);
   const [isColumnDropdownOpen, setIsColumnDropdownOpen] = useState(false);
   const columnDropdownRef = useRef(null);
-  
+
   // Modal states
   const [selectedStock, setSelectedStock] = useState(null);
   const [detailsViewMode, setDetailsViewMode] = useState('metrics'); // 'metrics' | 'chart'
@@ -124,16 +160,16 @@ export default function App() {
         fetch('/api/tickers'),
         fetch('/api/scrape/status')
       ]);
-      
+
       const ctS = stocksRes.headers.get('content-type');
       if (ctS && ctS.includes('text/html')) {
         throw new Error("API returned HTML instead of JSON (likely dev server fallback)");
       }
-      
+
       const stocksData = await stocksRes.json();
       const tickersData = await tickersRes.json();
       const statusData = await statusRes.json();
-      
+
       setStocks(stocksData);
       setTickers(tickersData);
       setScrapeStatus(statusData);
@@ -147,11 +183,11 @@ export default function App() {
           fetch('api/tickers.json'),
           fetch('api/status.json')
         ]);
-        
+
         const stocksData = await stocksRes.json();
         const tickersData = await tickersRes.json();
         const statusData = await statusRes.json();
-        
+
         setStocks(stocksData);
         setTickers(tickersData);
         setScrapeStatus(statusData);
@@ -423,9 +459,9 @@ export default function App() {
 
         // Build a detailed summary toast
         const parts = [];
-        if (data.added?.length)   parts.push(`✅ Added: ${data.added.join(', ')}`);
+        if (data.added?.length) parts.push(`✅ Added: ${data.added.join(', ')}`);
         if (data.skipped?.length) parts.push(`⚠️ Already tracked: ${data.skipped.join(', ')}`);
-        if (data.errors?.length)  parts.push(`❌ Failed: ${data.errors.map(e => e.symbol).join(', ')}`);
+        if (data.errors?.length) parts.push(`❌ Failed: ${data.errors.map(e => e.symbol).join(', ')}`);
         const toastType = data.added?.length > 0 ? 'success' : 'warning';
         addToast(parts.join('  |  ') || data.message, toastType);
 
@@ -537,7 +573,7 @@ export default function App() {
   // Filter Stocks
   const filteredStocks = stocks.filter(item => {
     const query = searchQuery.toLowerCase();
-    const matchesSearch = 
+    const matchesSearch =
       item.Ticker?.toLowerCase().includes(query) ||
       item.Name?.toLowerCase().includes(query) ||
       item.Sector?.toLowerCase().includes(query) ||
@@ -655,18 +691,18 @@ export default function App() {
 
   // Paginated Stocks Slice
   const totalPages = pageSize === -1 ? 1 : Math.ceil(sortedStocks.length / pageSize);
-const paginatedStocks = pageSize === -1 
-    ? sortedStocks 
+  const paginatedStocks = pageSize === -1
+    ? sortedStocks
     : sortedStocks.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   // Stats
   const totalTrackedCount = stocks.length;
   const isFiltered = Boolean(
-    searchQuery.trim() || 
-    selectedSector || 
-    selectedValuation || 
-    selectedScoreFilter || 
-    selectedTVFilter || 
+    searchQuery.trim() ||
+    selectedSector ||
+    selectedValuation ||
+    selectedScoreFilter ||
+    selectedTVFilter ||
     selectedConvictionFilter
   );
   const activeDataset = isFiltered ? filteredStocks : stocks;
@@ -694,7 +730,7 @@ const paginatedStocks = pageSize === -1
 
   const handleToggleCompare = (e, ticker) => {
     e.stopPropagation();
-    setSelectedCompare(prev => 
+    setSelectedCompare(prev =>
       prev.includes(ticker) ? prev.filter(t => t !== ticker) : [...prev, ticker]
     );
   };
@@ -769,7 +805,7 @@ const paginatedStocks = pageSize === -1
 
   const getPillarBreakdown = (stock) => {
     if (!stock) return { valuation: 0, quality: 0, moat: 0, momentum: 0, total: 0 };
-    
+
     // 1. Valuation (0-25)
     let val_pts = 10;
     const val_status = String(stock['GF Valuation'] || '');
@@ -779,7 +815,7 @@ const paginatedStocks = pageSize === -1
     else if (val_status.includes('Modestly Overvalued')) val_pts = 6;
     else if (val_status.includes('Significantly Overvalued')) val_pts = 2;
     else if (val_status.includes('Value Trap')) val_pts = 0;
-    
+
     const upsideNum = parseNumber(stock['Target Upside %']);
     if (upsideNum !== null && upsideNum >= 20.0) {
       val_pts = Math.min(25, val_pts + 3);
@@ -1037,7 +1073,7 @@ const paginatedStocks = pageSize === -1
       return;
     }
     const headers = [
-      'Ticker', 'Name', 'Sector', 'Market Cap', 'Price', 'Change %', 
+      'Ticker', 'Name', 'Sector', 'Market Cap', 'Price', 'Change %',
       'Composite Score', 'GF Value', 'GF Valuation', 'Moat',
       'Piotroski F-Score', 'Altman Z-Score', 'P/E', 'Forward P/E', 'PEG', 'Debt/Eq',
       'TV Technical', 'TV RSI', 'Analyst Target', 'Target Upside %', 'Next Earnings Date'
@@ -1087,35 +1123,63 @@ const paginatedStocks = pageSize === -1
             <h1>Stock Intelligence Portal</h1>
           </div>
         </div>
-        
+
+        {/* Top-Level Route Switcher */}
+        <div className="app-nav-tabs">
+          <button
+            className={`nav-tab-btn ${currentRoute === 'screener' ? 'active' : ''}`}
+            onClick={() => navigateToRoute('screener')}
+          >
+            <i className="fa-solid fa-table-list"></i>
+            <span>Watchlist Screener</span>
+          </button>
+          <button
+            className={`nav-tab-btn ${currentRoute === 'oracle' ? 'active' : ''}`}
+            onClick={() => navigateToRoute('oracle')}
+          >
+            <i className="fa-solid fa-brain-circuit"></i>
+            <span>Stock Oracle™ Analysis</span>
+            <span className="nav-badge-pulse">3 Theses</span>
+          </button>
+        </div>
+
         <div className="header-actions">
           <div className="last-updated">
             <i className="fa-solid fa-clock-rotate-left mr-2"></i> {isFiltered ? `${matchingCount} of ${totalTrackedCount} Tickers` : `${totalTrackedCount} Tickers Tracked`}
           </div>
-          <button 
-            className="btn btn-primary" 
-            onClick={triggerFullScrape}
-            disabled={scrapeStatus.running}
-          >
-            {scrapeStatus.running ? (
-              <>
-                <i className="fa-solid fa-circle-notch fa-spin"></i> Scraping...
-              </>
-            ) : (
-              <>
-                <i className="fa-solid fa-arrows-rotate"></i> Run Full Scrape
-              </>
-            )}
-          </button>
-          <button className="btn btn-secondary" onClick={() => setIsAddOpen(true)}>
-            <i className="fa-solid fa-plus"></i> Add Ticker
-          </button>
-          <button className="btn btn-secondary" onClick={() => setIsAllocatorOpen(true)} title="Portfolio Conviction Sizing Tool">
-            <i className="fa-solid fa-wallet"></i> Allocator
-          </button>
-          <button className="btn btn-secondary" onClick={handleExportCSV} title="Export Watchlist to CSV">
-            <i className="fa-solid fa-file-arrow-down"></i> Export CSV
-          </button>
+          {currentRoute === 'screener' && (
+            <>
+              <button
+                className="btn btn-primary"
+                onClick={triggerFullScrape}
+                disabled={scrapeStatus.running}
+              >
+                {scrapeStatus.running ? (
+                  <>
+                    <i className="fa-solid fa-circle-notch fa-spin"></i> Scraping...
+                  </>
+                ) : (
+                  <>
+                    <i className="fa-solid fa-arrows-rotate"></i> Run Full Scrape
+                  </>
+                )}
+              </button>
+              <button className="btn btn-secondary" onClick={() => setIsAddOpen(true)}>
+                <i className="fa-solid fa-plus"></i> Add Ticker
+              </button>
+              <button className="btn btn-secondary" onClick={() => setIsAllocatorOpen(true)} title="Portfolio Conviction Sizing Tool">
+                <i className="fa-solid fa-wallet"></i> Allocator
+              </button>
+              <button className="btn btn-secondary" onClick={handleExportCSV} title="Export Watchlist to CSV">
+                <i className="fa-solid fa-file-arrow-down"></i> Export CSV
+              </button>
+            </>
+          )}
+          {currentRoute === 'oracle' && (
+            <button className="btn btn-secondary" onClick={() => navigateToRoute('screener')}>
+              <i className="fa-solid fa-arrow-left"></i> Back to Screener
+            </button>
+          )}
         </div>
       </header>
 
@@ -1140,8 +1204,8 @@ const paginatedStocks = pageSize === -1
             <span><strong>Status:</strong> {scrapeStatus.message}</span>
           </div>
           <div className="scrape-progress-bar">
-            <div 
-              className="scrape-progress-fill" 
+            <div
+              className="scrape-progress-fill"
               style={{ width: `${scrapeStatus.total > 0 ? (scrapeStatus.progress / scrapeStatus.total) * 100 : 0}%` }}
             ></div>
           </div>
@@ -1149,604 +1213,622 @@ const paginatedStocks = pageSize === -1
         </div>
       )}
 
-      {/* Summary Cards */}
-      <div className="summary-grid">
-        <div className="summary-card">
-          <div className="card-icon-wrapper primary">
-            <i className="fa-solid fa-list-check"></i>
-          </div>
-          <div className="card-content">
-            <h3>{isFiltered ? 'Matching Tickers' : 'Total Tickers'}</h3>
-            <div className="card-value">{isFiltered ? matchingCount : totalTrackedCount}</div>
-            {isFiltered && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>of {totalTrackedCount} total</div>}
-          </div>
-        </div>
+      {/* SCREENER VIEW */}
+      {currentRoute === 'screener' && (
+        <>
+          {/* Summary Cards */}
+          <div className="summary-grid">
+            <div className="summary-card">
+              <div className="card-icon-wrapper primary">
+                <i className="fa-solid fa-list-check"></i>
+              </div>
+              <div className="card-content">
+                <h3>{isFiltered ? 'Matching Tickers' : 'Total Tickers'}</h3>
+                <div className="card-value">{isFiltered ? matchingCount : totalTrackedCount}</div>
+                {isFiltered && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>of {totalTrackedCount} total</div>}
+              </div>
+            </div>
 
-        <div className="summary-card">
-          <div className="card-icon-wrapper success">
-            <i className="fa-solid fa-circle-arrow-down"></i>
-          </div>
-          <div className="card-content">
-            <h3>Undervalued Stocks</h3>
-            <div className="card-value">{undervaluedCount}</div>
-            {isFiltered && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>in filtered view</div>}
-          </div>
-        </div>
+            <div className="summary-card">
+              <div className="card-icon-wrapper success">
+                <i className="fa-solid fa-circle-arrow-down"></i>
+              </div>
+              <div className="card-content">
+                <h3>Undervalued Stocks</h3>
+                <div className="card-value">{undervaluedCount}</div>
+                {isFiltered && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>in filtered view</div>}
+              </div>
+            </div>
 
-        <div className="summary-card">
-          <div className="card-icon-wrapper danger">
-            <i className="fa-solid fa-circle-exclamation"></i>
-          </div>
-          <div className="card-content">
-            <h3>Value Traps</h3>
-            <div className="card-value">{trapCount}</div>
-            {isFiltered && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>in filtered view</div>}
-          </div>
-        </div>
+            <div className="summary-card">
+              <div className="card-icon-wrapper danger">
+                <i className="fa-solid fa-circle-exclamation"></i>
+              </div>
+              <div className="card-content">
+                <h3>Value Traps</h3>
+                <div className="card-value">{trapCount}</div>
+                {isFiltered && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>in filtered view</div>}
+              </div>
+            </div>
 
-        <div className="summary-card">
-          <div className="card-icon-wrapper warning">
-            <i className="fa-solid fa-tags"></i>
+            <div className="summary-card">
+              <div className="card-icon-wrapper warning">
+                <i className="fa-solid fa-tags"></i>
+              </div>
+              <div className="card-content">
+                <h3>Sectors Tracked</h3>
+                <div className="card-value">{sectorCount}</div>
+                {isFiltered && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>in filtered view</div>}
+              </div>
+            </div>
           </div>
-          <div className="card-content">
-            <h3>Sectors Tracked</h3>
-            <div className="card-value">{sectorCount}</div>
-            {isFiltered && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>in filtered view</div>}
-          </div>
-        </div>
-      </div>
 
-      {/* Watchlist Pulse & Buy-the-Dip Radar */}
-      <div className="watchlist-pulse-bar">
-        <div className="pulse-section">
-          <span className="pulse-label"><i className="fa-solid fa-arrow-trend-up" style={{ color: '#34d399' }}></i> Top Gainers:</span>
-          <div className="pulse-items">
-            {topGainers.map(s => (
-              <button key={s.Ticker} className="pulse-pill" onClick={() => handleSelectStock(s)} title="Click to view stock details">
-                <strong>{s.Ticker}</strong> <span className="value-pos">{s['Change %']}</span>
+          {/* Watchlist Pulse & Buy-the-Dip Radar */}
+          <div className="watchlist-pulse-bar">
+            <div className="pulse-section">
+              <span className="pulse-label"><i className="fa-solid fa-arrow-trend-up" style={{ color: '#34d399' }}></i> Top Gainers:</span>
+              <div className="pulse-items">
+                {topGainers.map(s => (
+                  <button key={s.Ticker} className="pulse-pill" onClick={() => handleSelectStock(s)} title="Click to view stock details">
+                    <strong>{s.Ticker}</strong> <span className="value-pos">{s['Change %']}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="pulse-section">
+              <span className="pulse-label"><i className="fa-solid fa-bullseye" style={{ color: '#fbbf24' }}></i> Quality Dips (Score &ge; 65):</span>
+              <div className="pulse-items">
+                {topDips.length === 0 ? (
+                  <span className="pulse-empty">No high-conviction dips today</span>
+                ) : (
+                  topDips.map(s => (
+                    <button key={s.Ticker} className="pulse-pill dip" onClick={() => handleSelectStock(s)} title="Click to view stock details">
+                      <strong>{s.Ticker}</strong> <span className="value-neg">{s['Change %']}</span> <span className="pulse-score-tag">⭐{s['Composite Score']}</span>
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <button
+              className={`pulse-filter-btn ${selectedConvictionFilter === 'dip' ? 'active' : ''}`}
+              onClick={() => setSelectedConvictionFilter(prev => prev === 'dip' ? '' : 'dip')}
+              title="Filter for high-conviction stocks trading down today"
+            >
+              <i className="fa-solid fa-bolt"></i> {selectedConvictionFilter === 'dip' ? 'Clear Dip Filter' : '🎯 Buy the Dip Radar'}
+            </button>
+          </div>
+
+          {/* Controls & Filter Bar */}
+          <div className="controls-card">
+            <div className="search-wrapper">
+              <i className="fa-solid fa-magnifying-glass"></i>
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search by ticker, company, sector, country..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+
+            <select
+              className="filter-select"
+              value={selectedSector}
+              onChange={(e) => setSelectedSector(e.target.value)}
+            >
+              <option value="">All Sectors</option>
+              {sectors.map(sec => (
+                <option key={sec} value={sec}>{sec}</option>
+              ))}
+            </select>
+
+            <select
+              className="filter-select"
+              value={selectedValuation}
+              onChange={(e) => setSelectedValuation(e.target.value)}
+            >
+              <option value="">All Valuations</option>
+              <option value="Significantly Undervalued">Significantly Undervalued</option>
+              <option value="Modestly Undervalued">Modestly Undervalued</option>
+              <option value="Fairly Valued">Fairly Valued</option>
+              <option value="Modestly Overvalued">Modestly Overvalued</option>
+              <option value="Significantly Overvalued">Significantly Overvalued</option>
+              <option value="Value Trap">Possible Value Trap</option>
+            </select>
+
+            <select
+              className="filter-select"
+              value={selectedScoreFilter}
+              onChange={(e) => setSelectedScoreFilter(e.target.value)}
+            >
+              <option value="">All Scores</option>
+              <option value="high-f">High F-Score (&gt;= 7)</option>
+              <option value="safe-z">Safe Z-Score (&gt;= 2.99)</option>
+            </select>
+
+            <select
+              className="filter-select"
+              value={selectedTVFilter}
+              onChange={(e) => setSelectedTVFilter(e.target.value)}
+            >
+              <option value="">All Technicals</option>
+              <option value="bullish">Bullish (Buy / Strong Buy)</option>
+              <option value="strong-buy">Strong Buy Only</option>
+              <option value="neutral">Neutral</option>
+              <option value="bearish">Bearish (Sell / Strong Sell)</option>
+            </select>
+
+            <select
+              className="filter-select"
+              value={selectedConvictionFilter}
+              onChange={(e) => setSelectedConvictionFilter(e.target.value)}
+            >
+              <option value="">All Conviction Scores</option>
+              <option value="high">High Conviction (&gt;= 80)</option>
+              <option value="buy">Buy Candidates (&gt;= 65)</option>
+              <option value="dip">🎯 Buy the Dip (Score &gt;= 65 &amp; Down)</option>
+              <option value="hold">Neutral / Hold (50-64)</option>
+              <option value="risk">Caution (&lt; 50)</option>
+            </select>
+
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleRefreshTradingView}
+              disabled={isTVRefreshing}
+              title="Instant refresh of live prices, technicals, scores, and targets via TradingView (0.3s)"
+            >
+              {isTVRefreshing ? (
+                <><i className="fa-solid fa-circle-notch fa-spin"></i> Refreshing...</>
+              ) : (
+                <><i className="fa-solid fa-bolt text-warning"></i> Fast TV Refresh</>
+              )}
+            </button>
+
+            {/* Column Visibility Selector */}
+            <div className="column-toggle-wrapper" ref={columnDropdownRef}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setIsColumnDropdownOpen(!isColumnDropdownOpen)}
+              >
+                <i className="fa-solid fa-columns"></i> Columns
               </button>
-            ))}
-          </div>
-        </div>
+              {isColumnDropdownOpen && (
+                <div className="column-toggle-dropdown">
+                  {allColumns.map(col => (
+                    <label key={col.id} className="column-toggle-item">
+                      <input
+                        type="checkbox"
+                        checked={visibleColumns.includes(col.id)}
+                        onChange={() => toggleColumnVisibility(col.id)}
+                      />
+                      {col.label}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
 
-        <div className="pulse-section">
-          <span className="pulse-label"><i className="fa-solid fa-bullseye" style={{ color: '#fbbf24' }}></i> Quality Dips (Score &ge; 65):</span>
-          <div className="pulse-items">
-            {topDips.length === 0 ? (
-              <span className="pulse-empty">No high-conviction dips today</span>
-            ) : (
-              topDips.map(s => (
-                <button key={s.Ticker} className="pulse-pill dip" onClick={() => handleSelectStock(s)} title="Click to view stock details">
-                  <strong>{s.Ticker}</strong> <span className="value-neg">{s['Change %']}</span> <span className="pulse-score-tag">⭐{s['Composite Score']}</span>
-                </button>
-              ))
+            {isFiltered && (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedSector('');
+                  setSelectedValuation('');
+                  setSelectedScoreFilter('');
+                  setSelectedTVFilter('');
+                  setSelectedConvictionFilter('');
+                }}
+                title="Reset all search and filter dropdowns"
+                style={{ color: '#fbbf24', borderColor: 'rgba(245, 158, 11, 0.4)' }}
+              >
+                <i className="fa-solid fa-rotate-left"></i> Reset Filters
+              </button>
             )}
           </div>
-        </div>
 
-        <button 
-          className={`pulse-filter-btn ${selectedConvictionFilter === 'dip' ? 'active' : ''}`}
-          onClick={() => setSelectedConvictionFilter(prev => prev === 'dip' ? '' : 'dip')}
-          title="Filter for high-conviction stocks trading down today"
-        >
-          <i className="fa-solid fa-bolt"></i> {selectedConvictionFilter === 'dip' ? 'Clear Dip Filter' : '🎯 Buy the Dip Radar'}
-        </button>
-      </div>
-
-      {/* Controls & Filter Bar */}
-      <div className="controls-card">
-        <div className="search-wrapper">
-          <i className="fa-solid fa-magnifying-glass"></i>
-          <input 
-            type="text" 
-            className="search-input" 
-            placeholder="Search by ticker, company, sector, country..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        
-        <select 
-          className="filter-select"
-          value={selectedSector}
-          onChange={(e) => setSelectedSector(e.target.value)}
-        >
-          <option value="">All Sectors</option>
-          {sectors.map(sec => (
-            <option key={sec} value={sec}>{sec}</option>
-          ))}
-        </select>
-
-        <select 
-          className="filter-select"
-          value={selectedValuation}
-          onChange={(e) => setSelectedValuation(e.target.value)}
-        >
-          <option value="">All Valuations</option>
-          <option value="Significantly Undervalued">Significantly Undervalued</option>
-          <option value="Modestly Undervalued">Modestly Undervalued</option>
-          <option value="Fairly Valued">Fairly Valued</option>
-          <option value="Modestly Overvalued">Modestly Overvalued</option>
-          <option value="Significantly Overvalued">Significantly Overvalued</option>
-          <option value="Value Trap">Possible Value Trap</option>
-        </select>
-
-        <select 
-          className="filter-select"
-          value={selectedScoreFilter}
-          onChange={(e) => setSelectedScoreFilter(e.target.value)}
-        >
-          <option value="">All Scores</option>
-          <option value="high-f">High F-Score (&gt;= 7)</option>
-          <option value="safe-z">Safe Z-Score (&gt;= 2.99)</option>
-        </select>
-
-        <select 
-          className="filter-select"
-          value={selectedTVFilter}
-          onChange={(e) => setSelectedTVFilter(e.target.value)}
-        >
-          <option value="">All Technicals</option>
-          <option value="bullish">Bullish (Buy / Strong Buy)</option>
-          <option value="strong-buy">Strong Buy Only</option>
-          <option value="neutral">Neutral</option>
-          <option value="bearish">Bearish (Sell / Strong Sell)</option>
-        </select>
-
-        <select 
-          className="filter-select"
-          value={selectedConvictionFilter}
-          onChange={(e) => setSelectedConvictionFilter(e.target.value)}
-        >
-          <option value="">All Conviction Scores</option>
-          <option value="high">High Conviction (&gt;= 80)</option>
-          <option value="buy">Buy Candidates (&gt;= 65)</option>
-          <option value="dip">🎯 Buy the Dip (Score &gt;= 65 &amp; Down)</option>
-          <option value="hold">Neutral / Hold (50-64)</option>
-          <option value="risk">Caution (&lt; 50)</option>
-        </select>
-
-        <button 
-          type="button" 
-          className="btn btn-secondary"
-          onClick={handleRefreshTradingView}
-          disabled={isTVRefreshing}
-          title="Instant refresh of live prices, technicals, scores, and targets via TradingView (0.3s)"
-        >
-          {isTVRefreshing ? (
-            <><i className="fa-solid fa-circle-notch fa-spin"></i> Refreshing...</>
-          ) : (
-            <><i className="fa-solid fa-bolt text-warning"></i> Fast TV Refresh</>
-          )}
-        </button>
-
-        {/* Column Visibility Selector */}
-        <div className="column-toggle-wrapper" ref={columnDropdownRef}>
-          <button 
-            type="button" 
-            className="btn btn-secondary"
-            onClick={() => setIsColumnDropdownOpen(!isColumnDropdownOpen)}
-          >
-            <i className="fa-solid fa-columns"></i> Columns
-          </button>
-          {isColumnDropdownOpen && (
-            <div className="column-toggle-dropdown">
-              {allColumns.map(col => (
-                <label key={col.id} className="column-toggle-item">
-                  <input 
-                    type="checkbox" 
-                    checked={visibleColumns.includes(col.id)}
-                    onChange={() => toggleColumnVisibility(col.id)}
-                  />
-                  {col.label}
-                </label>
-              ))}
+          {/* Table Section */}
+          {loading ? (
+            <div className="loader-wrapper">
+              <div className="spinner"></div>
+              <p>Loading Stock Dashboard...</p>
             </div>
-          )}
-        </div>
-
-        {isFiltered && (
-          <button 
-            type="button" 
-            className="btn btn-secondary"
-            onClick={() => {
-              setSearchQuery('');
-              setSelectedSector('');
-              setSelectedValuation('');
-              setSelectedScoreFilter('');
-              setSelectedTVFilter('');
-              setSelectedConvictionFilter('');
-            }}
-            title="Reset all search and filter dropdowns"
-            style={{ color: '#fbbf24', borderColor: 'rgba(245, 158, 11, 0.4)' }}
-          >
-            <i className="fa-solid fa-rotate-left"></i> Reset Filters
-          </button>
-        )}
-      </div>
-
-      {/* Table Section */}
-      {loading ? (
-        <div className="loader-wrapper">
-          <div className="spinner"></div>
-          <p>Loading Stock Dashboard...</p>
-        </div>
-      ) : (
-        <div>
-          <div className="table-wrapper">
-            {paginatedStocks.length === 0 ? (
-              <div className="empty-state">
-                <i className="fa-solid fa-folder-open"></i>
-                <p>No matching stocks found. Try broadening your filters.</p>
-              </div>
-            ) : (
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th style={{ width: '38px', textAlign: 'center', cursor: 'default' }}>
-                      <input 
-                        type="checkbox" 
-                        onChange={handleSelectAllCompare}
-                        checked={paginatedStocks.length > 0 && paginatedStocks.every(s => selectedCompare.includes(s.Ticker))}
-                        title="Select all for comparison"
-                      />
-                    </th>
-                    <th onClick={() => handleSort('Ticker')}>
-                      Ticker 
-                      <i className={`fa-solid ${sortKey === 'Ticker' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
-                    </th>
-                    {visibleColumns.includes('Score') && (
-                      <th onClick={() => handleSort('Composite Score')}>
-                        Score
-                        <i className={`fa-solid ${sortKey === 'Composite Score' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
-                      </th>
-                    )}
-                    {visibleColumns.includes('Name') && (
-                      <th onClick={() => handleSort('Name')}>
-                        Company Name
-                        <i className={`fa-solid ${sortKey === 'Name' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
-                      </th>
-                    )}
-                    {visibleColumns.includes('Sector') && (
-                      <th onClick={() => handleSort('Sector')}>
-                        Sector
-                        <i className={`fa-solid ${sortKey === 'Sector' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
-                      </th>
-                    )}
-                    {visibleColumns.includes('Market Cap') && (
-                      <th onClick={() => handleSort('Market Cap')}>
-                        Market Cap
-                        <i className={`fa-solid ${sortKey === 'Market Cap' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
-                      </th>
-                    )}
-                    {visibleColumns.includes('Price') && (
-                      <th className="text-right" onClick={() => handleSort('Price')}>
-                        Price
-                        <i className={`fa-solid ${sortKey === 'Price' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
-                      </th>
-                    )}
-                    {visibleColumns.includes('GF Value') && (
-                      <th className="text-right" onClick={() => handleSort('GF Value')}>
-                        GF Value
-                        <i className={`fa-solid ${sortKey === 'GF Value' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
-                      </th>
-                    )}
-                    {visibleColumns.includes('Change %') && (
-                      <th className="text-right" onClick={() => handleSort('Change %')}>
-                        Change %
-                        <i className={`fa-solid ${sortKey === 'Change %' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
-                      </th>
-                    )}
-                    {visibleColumns.includes('P/E') && (
-                      <th className="text-right" onClick={() => handleSort('P/E')}>
-                        P/E
-                        <i className={`fa-solid ${sortKey === 'P/E' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
-                      </th>
-                    )}
-                    {visibleColumns.includes('GF Valuation') && (
-                      <th onClick={() => handleSort('GF Valuation')}>
-                        GF Valuation
-                        <i className={`fa-solid ${sortKey === 'GF Valuation' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
-                      </th>
-                    )}
-                    {visibleColumns.includes('TV Technical') && (
-                      <th onClick={() => handleSort('TV Technical')}>
-                        TV Technical
-                        <i className={`fa-solid ${sortKey === 'TV Technical' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
-                      </th>
-                    )}
-                    {visibleColumns.includes('Analyst Target') && (
-                      <th className="text-right" onClick={() => handleSort('Analyst Target')}>
-                        Analyst Target
-                        <i className={`fa-solid ${sortKey === 'Analyst Target' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
-                      </th>
-                    )}
-                    {visibleColumns.includes('F-Score') && (
-                      <th className="text-right" onClick={() => handleSort('Piotroski F-Score')}>
-                        F-Score
-                        <i className={`fa-solid ${sortKey === 'Piotroski F-Score' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
-                      </th>
-                    )}
-                    {visibleColumns.includes('Z-Score') && (
-                      <th className="text-right" onClick={() => handleSort('Altman Z-Score')}>
-                        Z-Score
-                        <i className={`fa-solid ${sortKey === 'Altman Z-Score' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
-                      </th>
-                    )}
-                    <th className="text-center" style={{ width: '60px', cursor: 'default' }}>Del</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedStocks.map((item) => {
-                    const changeStr = item['Change %'] || '0.00%';
-                    const isChangeNeg = changeStr.startsWith('-');
-                    const dataStatus = getDataStatus(item);
-                    const daysToEarnings = item['Days to Earnings'];
-                    const hasUpcomingEarnings = daysToEarnings !== null && daysToEarnings !== undefined && daysToEarnings !== '' && parseInt(daysToEarnings) <= 14 && parseInt(daysToEarnings) >= 0;
-                    const pBreakdown = getPillarBreakdown(item);
-
-                    return (
-                      <tr
-                        key={item.Ticker}
-                        onClick={() => handleSelectStock(item)}
-                        className={`${dataStatus === 'pending' ? 'row-pending' : dataStatus === 'partial' ? 'row-partial' : ''} ${selectedCompare.includes(item.Ticker) ? 'row-selected' : ''}`}
-                      >
-                        <td onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center' }}>
-                          <input 
-                            type="checkbox" 
-                            checked={selectedCompare.includes(item.Ticker)}
-                            onChange={(e) => handleToggleCompare(e, item.Ticker)}
-                            title={`Select ${item.Ticker} to compare`}
+          ) : (
+            <div>
+              <div className="table-wrapper">
+                {paginatedStocks.length === 0 ? (
+                  <div className="empty-state">
+                    <i className="fa-solid fa-folder-open"></i>
+                    <p>No matching stocks found. Try broadening your filters.</p>
+                  </div>
+                ) : (
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th style={{ width: '38px', textAlign: 'center', cursor: 'default' }}>
+                          <input
+                            type="checkbox"
+                            onChange={handleSelectAllCompare}
+                            checked={paginatedStocks.length > 0 && paginatedStocks.every(s => selectedCompare.includes(s.Ticker))}
+                            title="Select all for comparison"
                           />
-                        </td>
-                        <td>
-                          <div className="ticker-cell">
-                            <span className="ticker-badge">{item.Ticker}</span>
-                            {hasUpcomingEarnings && (
-                              <div className="tooltip-wrapper tooltip-align-left" onClick={(e) => e.stopPropagation()}>
-                                <span className="earnings-alert-badge">
-                                  📅 {daysToEarnings}d
-                                </span>
-                                <div className="custom-tooltip">
-                                  <div className="tooltip-title">
-                                    <i className="fa-solid fa-calendar-days" style={{ color: '#fbbf24' }}></i>
-                                    Earnings Catalyst
-                                  </div>
-                                  <div className="tooltip-body">
-                                    Expected on <strong>{item['Next Earnings Date']}</strong> ({daysToEarnings} day{daysToEarnings !== '1' && daysToEarnings !== 1 ? 's' : ''} away).
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                            {dataStatus === 'pending' && (
-                              <div className="tooltip-wrapper tooltip-align-left" onClick={(e) => e.stopPropagation()}>
-                                <span className="data-status-icon pending">
-                                  <i className="fa-solid fa-clock"></i>
-                                </span>
-                                <div className="custom-tooltip">
-                                  <div className="tooltip-title">
-                                    <i className="fa-solid fa-clock" style={{ color: 'var(--text-secondary)' }}></i>
-                                    Pending Scrape
-                                  </div>
-                                  <div className="tooltip-body">
-                                    <p style={{ margin: '0 0 4px 0' }}>This stock was recently added and has not been scraped yet.</p>
-                                    <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Click "Start Scraping" above to pull live financials.</span>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                            {dataStatus === 'partial' && (() => {
-                              const missingList = getMissingFieldsList(item);
-                              return (
-                                <div className="tooltip-wrapper tooltip-align-left" onClick={(e) => e.stopPropagation()}>
-                                  <span className="data-status-icon partial">
-                                    <i className="fa-solid fa-triangle-exclamation"></i>
-                                  </span>
-                                  <div className="custom-tooltip">
-                                    <div className="tooltip-title">
-                                      <i className="fa-solid fa-triangle-exclamation" style={{ color: 'var(--warning)' }}></i>
-                                      GuruFocus Details Pending
-                                    </div>
-                                    <div className="tooltip-body">
-                                      <p style={{ margin: '0 0 4px 0', fontSize: '0.78rem', color: '#e2e8f0' }}>
-                                        GuruFocus metrics ({missingList.join(', ') || 'GF Value, F-Score, Z-Score'}) require server-side Python scraping.
-                                      </p>
-                                      <span style={{ fontSize: '0.7rem', color: '#fbbf24' }}>
-                                        Run GitHub Actions "Stock Scraper" or local ./start.sh to populate full GF metrics.
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            })()}
-                          </div>
-                        </td>
+                        </th>
+                        <th onClick={() => handleSort('Ticker')}>
+                          Ticker
+                          <i className={`fa-solid ${sortKey === 'Ticker' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
+                        </th>
                         {visibleColumns.includes('Score') && (
-                          <td>
-                            {item['Composite Score'] !== undefined && item['Composite Score'] !== '' && item['Composite Score'] !== '-' ? (
-                              <div className="tooltip-wrapper" onClick={(e) => e.stopPropagation()}>
-                                <div className={`score-pill ${getScoreClass(item['Composite Score'])}`}>
-                                  <span className="score-num">{item['Composite Score']}</span>
-                                  <span className="score-denom">/100</span>
-                                </div>
-                                <div className="custom-tooltip">
-                                  <div className="tooltip-title">
-                                    <span>Composite Score: {item['Composite Score']}/100</span>
-                                    <span className={`score-badge ${getScoreClass(item['Composite Score'])}`} style={{ padding: '0.1rem 0.35rem', fontSize: '0.65rem' }}>
-                                      {getConvictionTier(item['Composite Score'])}
-                                    </span>
-                                  </div>
-                                  <div className="tooltip-body">
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 10px', marginTop: '4px' }}>
-                                      <div>Valuation: <strong style={{ color: '#38bdf8' }}>{pBreakdown.valuation}/25</strong></div>
-                                      <div>Quality: <strong style={{ color: '#34d399' }}>{pBreakdown.quality}/35</strong></div>
-                                      <div>Moat: <strong style={{ color: '#a78bfa' }}>{pBreakdown.moat}/15</strong></div>
-                                      <div>Momentum: <strong style={{ color: '#f59e0b' }}>{pBreakdown.momentum}/25</strong></div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            ) : '-'}
-                          </td>
+                          <th onClick={() => handleSort('Composite Score')}>
+                            Score
+                            <i className={`fa-solid ${sortKey === 'Composite Score' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
+                          </th>
                         )}
                         {visibleColumns.includes('Name') && (
-                          <td style={{ fontWeight: 500, whiteSpace: 'normal', maxWidth: '240px' }}>{item.Name || '-'}</td>
+                          <th onClick={() => handleSort('Name')}>
+                            Company Name
+                            <i className={`fa-solid ${sortKey === 'Name' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
+                          </th>
                         )}
                         {visibleColumns.includes('Sector') && (
-                          <td><span className="sector-badge">{item.Sector || '-'}</span></td>
+                          <th onClick={() => handleSort('Sector')}>
+                            Sector
+                            <i className={`fa-solid ${sortKey === 'Sector' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
+                          </th>
                         )}
                         {visibleColumns.includes('Market Cap') && (
-                          <td>{item['Market Cap'] || '-'}</td>
+                          <th onClick={() => handleSort('Market Cap')}>
+                            Market Cap
+                            <i className={`fa-solid ${sortKey === 'Market Cap' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
+                          </th>
                         )}
                         {visibleColumns.includes('Price') && (
-                          <td className="text-right" style={{ fontWeight: 500 }}>
-                            {item.Price ? `$${item.Price}` : '-'}
-                          </td>
+                          <th className="text-right" onClick={() => handleSort('Price')}>
+                            Price
+                            <i className={`fa-solid ${sortKey === 'Price' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
+                          </th>
                         )}
                         {visibleColumns.includes('GF Value') && (
-                          <td className={`text-right ${getGFValuationColorClass(item['GF Valuation'])}`}>
-                            {item['GF Value'] ? `$${item['GF Value']}` : '-'}
-                          </td>
+                          <th className="text-right" onClick={() => handleSort('GF Value')}>
+                            GF Value
+                            <i className={`fa-solid ${sortKey === 'GF Value' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
+                          </th>
                         )}
                         {visibleColumns.includes('Change %') && (
-                          <td className={`text-right ${isChangeNeg ? 'value-neg' : 'value-pos'}`}>
-                            {!isChangeNeg && changeStr !== '0.00%' && changeStr !== '-' ? `+${changeStr}` : changeStr}
-                          </td>
+                          <th className="text-right" onClick={() => handleSort('Change %')}>
+                            Change %
+                            <i className={`fa-solid ${sortKey === 'Change %' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
+                          </th>
                         )}
                         {visibleColumns.includes('P/E') && (
-                          <td className="text-right">{item['P/E'] || '-'}</td>
+                          <th className="text-right" onClick={() => handleSort('P/E')}>
+                            P/E
+                            <i className={`fa-solid ${sortKey === 'P/E' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
+                          </th>
                         )}
                         {visibleColumns.includes('GF Valuation') && (
-                          <td>
-                            {item['GF Valuation'] !== '-' && item['GF Valuation'] ? (
-                              <span className={`score-badge ${getGFValuationClass(item['GF Valuation'])}`}>
-                                {item['GF Valuation']}
-                              </span>
-                            ) : '-'}
-                          </td>
+                          <th onClick={() => handleSort('GF Valuation')}>
+                            GF Valuation
+                            <i className={`fa-solid ${sortKey === 'GF Valuation' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
+                          </th>
                         )}
                         {visibleColumns.includes('TV Technical') && (
-                          <td>
-                            {item['TV Technical'] ? (
-                              <span className={`score-badge ${getTVTechnicalClass(item['TV Technical'])}`}>
-                                {item['TV Technical']}
-                              </span>
-                            ) : '-'}
-                          </td>
+                          <th onClick={() => handleSort('TV Technical')}>
+                            TV Technical
+                            <i className={`fa-solid ${sortKey === 'TV Technical' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
+                          </th>
                         )}
                         {visibleColumns.includes('Analyst Target') && (
-                          <td className="text-right">
-                            {item['Analyst Target'] ? (
-                              <div className="target-price-cell">
-                                <span style={{ fontWeight: 500 }}>${item['Analyst Target']}</span>
-                                {item['Target Upside %'] && (
-                                  <span className={`target-upside ${item['Target Upside %'].startsWith('-') ? 'value-neg' : 'value-pos'}`}>
-                                    {item['Target Upside %']}
-                                  </span>
-                                )}
-                              </div>
-                            ) : '-'}
-                          </td>
+                          <th className="text-right" onClick={() => handleSort('Analyst Target')}>
+                            Analyst Target
+                            <i className={`fa-solid ${sortKey === 'Analyst Target' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
+                          </th>
                         )}
                         {visibleColumns.includes('F-Score') && (
-                          <td className="text-right">
-                            {item['Piotroski F-Score'] !== '-' && item['Piotroski F-Score'] ? (
-                              <span className={`score-badge ${getFScoreClass(item['Piotroski F-Score'])}`}>
-                                {item['Piotroski F-Score']}
-                              </span>
-                            ) : '-'}
-                          </td>
+                          <th className="text-right" onClick={() => handleSort('Piotroski F-Score')}>
+                            F-Score
+                            <i className={`fa-solid ${sortKey === 'Piotroski F-Score' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
+                          </th>
                         )}
                         {visibleColumns.includes('Z-Score') && (
-                          <td className="text-right">
-                            {item['Altman Z-Score'] !== '-' && item['Altman Z-Score'] ? (
-                              <span className={`score-badge ${getZScoreClass(item['Altman Z-Score'])}`}>
-                                {item['Altman Z-Score']}
-                              </span>
-                            ) : '-'}
-                          </td>
+                          <th className="text-right" onClick={() => handleSort('Altman Z-Score')}>
+                            Z-Score
+                            <i className={`fa-solid ${sortKey === 'Altman Z-Score' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} sort-icon`}></i>
+                          </th>
                         )}
-                        <td className="text-center" onClick={(e) => e.stopPropagation()}>
-                          <div className="tooltip-wrapper tooltip-align-right">
-                            <button 
-                              className="delete-btn" 
-                              onClick={() => setDeleteConfirmStock(item)}
-                            >
-                              <i className="fa-solid fa-trash-can"></i>
-                            </button>
-                            <div className="custom-tooltip">
-                              <div className="tooltip-body" style={{ whiteSpace: 'nowrap' }}>
-                                Remove {item.Ticker}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
+                        <th className="text-center" style={{ width: '60px', cursor: 'default' }}>Del</th>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            )}
-          </div>
-          
-          {/* Pagination Controls */}
-          {sortedStocks.length > 0 && (
-            <div className="pagination-container">
-              <div>
-                Showing {sortedStocks.length === 0 ? 0 : (pageSize === -1 ? 1 : (currentPage - 1) * pageSize + 1)} to{' '}
-                {pageSize === -1 ? sortedStocks.length : Math.min(currentPage * pageSize, sortedStocks.length)} of{' '}
-                {isFiltered ? `${sortedStocks.length} matching stocks (filtered from ${totalTrackedCount} total)` : `${sortedStocks.length} stocks`}
+                    </thead>
+                    <tbody>
+                      {paginatedStocks.map((item) => {
+                        const changeStr = item['Change %'] || '0.00%';
+                        const isChangeNeg = changeStr.startsWith('-');
+                        const dataStatus = getDataStatus(item);
+                        const daysToEarnings = item['Days to Earnings'];
+                        const hasUpcomingEarnings = daysToEarnings !== null && daysToEarnings !== undefined && daysToEarnings !== '' && parseInt(daysToEarnings) <= 14 && parseInt(daysToEarnings) >= 0;
+                        const pBreakdown = getPillarBreakdown(item);
+
+                        return (
+                          <tr
+                            key={item.Ticker}
+                            onClick={() => handleSelectStock(item)}
+                            className={`${dataStatus === 'pending' ? 'row-pending' : dataStatus === 'partial' ? 'row-partial' : ''} ${selectedCompare.includes(item.Ticker) ? 'row-selected' : ''}`}
+                          >
+                            <td onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center' }}>
+                              <input
+                                type="checkbox"
+                                checked={selectedCompare.includes(item.Ticker)}
+                                onChange={(e) => handleToggleCompare(e, item.Ticker)}
+                                title={`Select ${item.Ticker} to compare`}
+                              />
+                            </td>
+                            <td>
+                              <div className="ticker-cell">
+                                <span className="ticker-badge">{item.Ticker}</span>
+                                {hasUpcomingEarnings && (
+                                  <div className="tooltip-wrapper tooltip-align-left" onClick={(e) => e.stopPropagation()}>
+                                    <span className="earnings-alert-badge">
+                                      📅 {daysToEarnings}d
+                                    </span>
+                                    <div className="custom-tooltip">
+                                      <div className="tooltip-title">
+                                        <i className="fa-solid fa-calendar-days" style={{ color: '#fbbf24' }}></i>
+                                        Earnings Catalyst
+                                      </div>
+                                      <div className="tooltip-body">
+                                        Expected on <strong>{item['Next Earnings Date']}</strong> ({daysToEarnings} day{daysToEarnings !== '1' && daysToEarnings !== 1 ? 's' : ''} away).
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                                {dataStatus === 'pending' && (
+                                  <div className="tooltip-wrapper tooltip-align-left" onClick={(e) => e.stopPropagation()}>
+                                    <span className="data-status-icon pending">
+                                      <i className="fa-solid fa-clock"></i>
+                                    </span>
+                                    <div className="custom-tooltip">
+                                      <div className="tooltip-title">
+                                        <i className="fa-solid fa-clock" style={{ color: 'var(--text-secondary)' }}></i>
+                                        Pending Scrape
+                                      </div>
+                                      <div className="tooltip-body">
+                                        <p style={{ margin: '0 0 4px 0' }}>This stock was recently added and has not been scraped yet.</p>
+                                        <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Click "Start Scraping" above to pull live financials.</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                                {dataStatus === 'partial' && (() => {
+                                  const missingList = getMissingFieldsList(item);
+                                  return (
+                                    <div className="tooltip-wrapper tooltip-align-left" onClick={(e) => e.stopPropagation()}>
+                                      <span className="data-status-icon partial">
+                                        <i className="fa-solid fa-triangle-exclamation"></i>
+                                      </span>
+                                      <div className="custom-tooltip">
+                                        <div className="tooltip-title">
+                                          <i className="fa-solid fa-triangle-exclamation" style={{ color: 'var(--warning)' }}></i>
+                                          GuruFocus Details Pending
+                                        </div>
+                                        <div className="tooltip-body">
+                                          <p style={{ margin: '0 0 4px 0', fontSize: '0.78rem', color: '#e2e8f0' }}>
+                                            GuruFocus metrics ({missingList.join(', ') || 'GF Value, F-Score, Z-Score'}) require server-side Python scraping.
+                                          </p>
+                                          <span style={{ fontSize: '0.7rem', color: '#fbbf24' }}>
+                                            Run GitHub Actions "Stock Scraper" or local ./start.sh to populate full GF metrics.
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })()}
+                              </div>
+                            </td>
+                            {visibleColumns.includes('Score') && (
+                              <td>
+                                {item['Composite Score'] !== undefined && item['Composite Score'] !== '' && item['Composite Score'] !== '-' ? (
+                                  <div className="tooltip-wrapper" onClick={(e) => e.stopPropagation()}>
+                                    <div className={`score-pill ${getScoreClass(item['Composite Score'])}`}>
+                                      <span className="score-num">{item['Composite Score']}</span>
+                                      <span className="score-denom">/100</span>
+                                    </div>
+                                    <div className="custom-tooltip">
+                                      <div className="tooltip-title">
+                                        <span>Composite Score: {item['Composite Score']}/100</span>
+                                        <span className={`score-badge ${getScoreClass(item['Composite Score'])}`} style={{ padding: '0.1rem 0.35rem', fontSize: '0.65rem' }}>
+                                          {getConvictionTier(item['Composite Score'])}
+                                        </span>
+                                      </div>
+                                      <div className="tooltip-body">
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 10px', marginTop: '4px' }}>
+                                          <div>Valuation: <strong style={{ color: '#38bdf8' }}>{pBreakdown.valuation}/25</strong></div>
+                                          <div>Quality: <strong style={{ color: '#34d399' }}>{pBreakdown.quality}/35</strong></div>
+                                          <div>Moat: <strong style={{ color: '#a78bfa' }}>{pBreakdown.moat}/15</strong></div>
+                                          <div>Momentum: <strong style={{ color: '#f59e0b' }}>{pBreakdown.momentum}/25</strong></div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ) : '-'}
+                              </td>
+                            )}
+                            {visibleColumns.includes('Name') && (
+                              <td style={{ fontWeight: 500, whiteSpace: 'normal', maxWidth: '240px' }}>{item.Name || '-'}</td>
+                            )}
+                            {visibleColumns.includes('Sector') && (
+                              <td><span className="sector-badge">{item.Sector || '-'}</span></td>
+                            )}
+                            {visibleColumns.includes('Market Cap') && (
+                              <td>{item['Market Cap'] || '-'}</td>
+                            )}
+                            {visibleColumns.includes('Price') && (
+                              <td className="text-right" style={{ fontWeight: 500 }}>
+                                {item.Price ? `$${item.Price}` : '-'}
+                              </td>
+                            )}
+                            {visibleColumns.includes('GF Value') && (
+                              <td className={`text-right ${getGFValuationColorClass(item['GF Valuation'])}`}>
+                                {item['GF Value'] ? `$${item['GF Value']}` : '-'}
+                              </td>
+                            )}
+                            {visibleColumns.includes('Change %') && (
+                              <td className={`text-right ${isChangeNeg ? 'value-neg' : 'value-pos'}`}>
+                                {!isChangeNeg && changeStr !== '0.00%' && changeStr !== '-' ? `+${changeStr}` : changeStr}
+                              </td>
+                            )}
+                            {visibleColumns.includes('P/E') && (
+                              <td className="text-right">{item['P/E'] || '-'}</td>
+                            )}
+                            {visibleColumns.includes('GF Valuation') && (
+                              <td>
+                                {item['GF Valuation'] !== '-' && item['GF Valuation'] ? (
+                                  <span className={`score-badge ${getGFValuationClass(item['GF Valuation'])}`}>
+                                    {item['GF Valuation']}
+                                  </span>
+                                ) : '-'}
+                              </td>
+                            )}
+                            {visibleColumns.includes('TV Technical') && (
+                              <td>
+                                {item['TV Technical'] ? (
+                                  <span className={`score-badge ${getTVTechnicalClass(item['TV Technical'])}`}>
+                                    {item['TV Technical']}
+                                  </span>
+                                ) : '-'}
+                              </td>
+                            )}
+                            {visibleColumns.includes('Analyst Target') && (
+                              <td className="text-right">
+                                {item['Analyst Target'] ? (
+                                  <div className="target-price-cell">
+                                    <span style={{ fontWeight: 500 }}>${item['Analyst Target']}</span>
+                                    {item['Target Upside %'] && (
+                                      <span className={`target-upside ${item['Target Upside %'].startsWith('-') ? 'value-neg' : 'value-pos'}`}>
+                                        {item['Target Upside %']}
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : '-'}
+                              </td>
+                            )}
+                            {visibleColumns.includes('F-Score') && (
+                              <td className="text-right">
+                                {item['Piotroski F-Score'] !== '-' && item['Piotroski F-Score'] ? (
+                                  <span className={`score-badge ${getFScoreClass(item['Piotroski F-Score'])}`}>
+                                    {item['Piotroski F-Score']}
+                                  </span>
+                                ) : '-'}
+                              </td>
+                            )}
+                            {visibleColumns.includes('Z-Score') && (
+                              <td className="text-right">
+                                {item['Altman Z-Score'] !== '-' && item['Altman Z-Score'] ? (
+                                  <span className={`score-badge ${getZScoreClass(item['Altman Z-Score'])}`}>
+                                    {item['Altman Z-Score']}
+                                  </span>
+                                ) : '-'}
+                              </td>
+                            )}
+                            <td className="text-center" onClick={(e) => e.stopPropagation()}>
+                              <div className="tooltip-wrapper tooltip-align-right">
+                                <button
+                                  className="delete-btn"
+                                  onClick={() => setDeleteConfirmStock(item)}
+                                >
+                                  <i className="fa-solid fa-trash-can"></i>
+                                </button>
+                                <div className="custom-tooltip">
+                                  <div className="tooltip-body" style={{ whiteSpace: 'nowrap' }}>
+                                    Remove {item.Ticker}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
               </div>
-              <div className="pagination-controls">
-                <span style={{ marginRight: '1rem' }}>Rows per page:</span>
-                <select 
-                  className="filter-select"
-                  style={{ padding: '0.375rem 2rem 0.375rem 0.75rem', marginRight: '1.5rem' }}
-                  value={pageSize}
-                  onChange={(e) => setPageSize(parseInt(e.target.value))}
-                >
-                  <option value={10}>10</option>
-                  <option value={25}>25</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                  <option value={-1}>All</option>
-                </select>
-                
-                <button 
-                  className="pagination-btn"
-                  onClick={() => setCurrentPage(1)}
-                  disabled={currentPage === 1 || pageSize === -1}
-                >
-                  <i className="fa-solid fa-angles-left"></i>
-                </button>
-                <button 
-                  className="pagination-btn"
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1 || pageSize === -1}
-                >
-                  <i className="fa-solid fa-angle-left"></i>
-                </button>
-                <span className="page-indicator">
-                  Page {currentPage} of {totalPages}
-                </span>
-                <button 
-                  className="pagination-btn"
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages || pageSize === -1}
-                >
-                  <i className="fa-solid fa-angle-right"></i>
-                </button>
-                <button 
-                  className="pagination-btn"
-                  onClick={() => setCurrentPage(totalPages)}
-                  disabled={currentPage === totalPages || pageSize === -1}
-                >
-                  <i className="fa-solid fa-angles-right"></i>
-                </button>
-              </div>
+
+              {/* Pagination Controls */}
+              {sortedStocks.length > 0 && (
+                <div className="pagination-container">
+                  <div>
+                    Showing {sortedStocks.length === 0 ? 0 : (pageSize === -1 ? 1 : (currentPage - 1) * pageSize + 1)} to{' '}
+                    {pageSize === -1 ? sortedStocks.length : Math.min(currentPage * pageSize, sortedStocks.length)} of{' '}
+                    {isFiltered ? `${sortedStocks.length} matching stocks (filtered from ${totalTrackedCount} total)` : `${sortedStocks.length} stocks`}
+                  </div>
+                  <div className="pagination-controls">
+                    <span style={{ marginRight: '1rem' }}>Rows per page:</span>
+                    <select
+                      className="filter-select"
+                      style={{ padding: '0.375rem 2rem 0.375rem 0.75rem', marginRight: '1.5rem' }}
+                      value={pageSize}
+                      onChange={(e) => setPageSize(parseInt(e.target.value))}
+                    >
+                      <option value={10}>10</option>
+                      <option value={25}>25</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                      <option value={-1}>All</option>
+                    </select>
+
+                    <button
+                      className="pagination-btn"
+                      onClick={() => setCurrentPage(1)}
+                      disabled={currentPage === 1 || pageSize === -1}
+                    >
+                      <i className="fa-solid fa-angles-left"></i>
+                    </button>
+                    <button
+                      className="pagination-btn"
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1 || pageSize === -1}
+                    >
+                      <i className="fa-solid fa-angle-left"></i>
+                    </button>
+                    <span className="page-indicator">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <button
+                      className="pagination-btn"
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages || pageSize === -1}
+                    >
+                      <i className="fa-solid fa-angle-right"></i>
+                    </button>
+                    <button
+                      className="pagination-btn"
+                      onClick={() => setCurrentPage(totalPages)}
+                      disabled={currentPage === totalPages || pageSize === -1}
+                    >
+                      <i className="fa-solid fa-angles-right"></i>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
-        </div>
+        </>
+      )}
+
+      {/* STOCK ORACLE 3-THESIS ANALYSIS LAB ROUTE */}
+      {currentRoute === 'oracle' && (
+        <StockOracleView
+          stocks={stocks}
+          selectedTicker={oracleSelectedTicker}
+          onSelectTicker={(sym) => {
+            setOracleSelectedTicker(sym);
+            window.location.hash = `#/oracle/${sym}`;
+          }}
+          isDemo={isDemo}
+        />
       )}
 
       {/* Unified Stock Details & Intelligence Modal with 4 Full Tabs */}
@@ -1764,9 +1846,22 @@ const paginatedStocks = pageSize === -1
                 </p>
               </div>
 
-              <button className="modal-close-btn" onClick={() => setSelectedStock(null)}>
-                <i className="fa-solid fa-xmark"></i>
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => {
+                    const sym = selectedStock.Ticker;
+                    setSelectedStock(null);
+                    navigateToRoute('oracle', sym);
+                  }}
+                  title="Open Stock Oracle 3-Thesis Valuation Lab for this stock"
+                >
+                  <i className="fa-solid fa-brain-circuit mr-1 text-primary"></i> Stock Oracle Lab
+                </button>
+                <button className="modal-close-btn" onClick={() => setSelectedStock(null)}>
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+              </div>
             </div>
 
             {/* GuruFocus Pending Scrape Banner */}
@@ -1796,32 +1891,32 @@ const paginatedStocks = pageSize === -1
 
             {/* 4 Navigation Tabs */}
             <div className="modal-tabs">
-              <button 
+              <button
                 className={`modal-tab-btn ${activeStockTab === 'overview' ? 'active' : ''}`}
                 onClick={() => setActiveStockTab('overview')}
               >
                 <i className="fa-solid fa-shield-halved"></i> Business &amp; Moat
               </button>
-              <button 
+              <button
                 className={`modal-tab-btn ${activeStockTab === 'indicators' ? 'active' : ''}`}
                 onClick={() => setActiveStockTab('indicators')}
               >
                 <i className="fa-solid fa-chart-pie"></i> Financials &amp; Thesis
               </button>
-              <button 
+              <button
                 className={`modal-tab-btn ${activeStockTab === 'chart' ? 'active' : ''}`}
                 onClick={() => setActiveStockTab('chart')}
               >
                 <i className="fa-solid fa-chart-candlestick"></i> TradingView Chart
               </button>
-              <button 
+              <button
                 className={`modal-tab-btn ${activeStockTab === 'news' ? 'active' : ''}`}
                 onClick={() => setActiveStockTab('news')}
               >
                 <i className="fa-solid fa-newspaper"></i> Live News &amp; Catalysts {newsData.length > 0 && <span className="tab-counter">{newsData.length}</span>}
               </button>
             </div>
-            
+
             <div className="modal-body">
               {/* TAB 1: Business & Moat */}
               {activeStockTab === 'overview' && (
@@ -1852,8 +1947,8 @@ const paginatedStocks = pageSize === -1
                           <div className="moat-meter-container">
                             <div className="moat-meter-bar">
                               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(step => (
-                                <div 
-                                  key={step} 
+                                <div
+                                  key={step}
                                   className={`moat-meter-segment ${step <= Number(overviewData.moat_score) ? 'filled ' + getMoatClass(overviewData.moat) : ''}`}
                                   title={`Moat Score: ${step}/10`}
                                 />
@@ -1905,9 +2000,9 @@ const paginatedStocks = pageSize === -1
                             <div className="meta-card">
                               <div className="meta-card-label"><i className="fa-solid fa-globe"></i> Official Website</div>
                               <div className="meta-card-value">
-                                <a 
-                                  href={overviewData.meta.website} 
-                                  target="_blank" 
+                                <a
+                                  href={overviewData.meta.website}
+                                  target="_blank"
                                   rel="noopener noreferrer"
                                   className="meta-link"
                                 >
@@ -1967,7 +2062,7 @@ const paginatedStocks = pageSize === -1
                           <i className="fa-solid fa-align-left"></i> Business Model &amp; Operations
                         </div>
                         {overviewData.description && (
-                          <button 
+                          <button
                             className="btn-copy-desc"
                             onClick={() => {
                               navigator.clipboard.writeText(overviewData.description);
@@ -2018,7 +2113,7 @@ const paginatedStocks = pageSize === -1
                               <p>Multi-Factor Quality, Valuation, Moat & Momentum Rating</p>
                             </div>
                           </div>
-                          
+
                           <div className="conviction-pillars-grid">
                             <div className="pillar-item">
                               <div className="pillar-header">
@@ -2153,10 +2248,10 @@ const paginatedStocks = pageSize === -1
                           <span className="news-source-badge">{article.source}</span>
                           <span className="news-time"><i className="fa-regular fa-clock"></i> {article.time_ago}</span>
                         </div>
-                        <a 
-                          href={article.link} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
+                        <a
+                          href={article.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="news-title-link"
                         >
                           {article.title}
@@ -2168,7 +2263,7 @@ const paginatedStocks = pageSize === -1
                 )
               )}
             </div>
-            
+
             <div className="modal-footer">
               {overviewData?.meta?.website && (
                 <a
@@ -2204,8 +2299,8 @@ const paginatedStocks = pageSize === -1
               >
                 <i className="fa-solid fa-arrow-up-right-from-square"></i> TradingView
               </a>
-              <button 
-                className="btn btn-danger" 
+              <button
+                className="btn btn-danger"
                 onClick={() => setDeleteConfirmStock(selectedStock)}
                 style={{ marginRight: 'auto' }}
               >
@@ -2356,9 +2451,9 @@ const paginatedStocks = pageSize === -1
                 </h2>
                 <p>Confirm ticker removal from your watchlist</p>
               </div>
-              <button 
-                className="modal-close-btn" 
-                onClick={() => !isDeleting && setDeleteConfirmStock(null)} 
+              <button
+                className="modal-close-btn"
+                onClick={() => !isDeleting && setDeleteConfirmStock(null)}
                 disabled={isDeleting}
               >
                 <i className="fa-solid fa-xmark"></i>
@@ -2430,8 +2525,8 @@ const paginatedStocks = pageSize === -1
             <span>stock{selectedCompare.length !== 1 ? 's' : ''} selected for comparison</span>
           </div>
           <div className="compare-bar-actions">
-            <button 
-              className="btn btn-primary" 
+            <button
+              className="btn btn-primary"
               onClick={() => setIsCompareOpen(true)}
               disabled={selectedCompare.length < 2}
             >
@@ -2690,9 +2785,9 @@ const paginatedStocks = pageSize === -1
                 <div className="allocator-controls">
                   <div className="allocator-input-group">
                     <label><i className="fa-solid fa-dollar-sign"></i> Target Capital:</label>
-                    <input 
-                      type="number" 
-                      min="1000" 
+                    <input
+                      type="number"
+                      min="1000"
                       step="1000"
                       className="allocator-input"
                       value={allocatorCapital}
@@ -2702,10 +2797,10 @@ const paginatedStocks = pageSize === -1
 
                   <div className="allocator-input-group">
                     <label><i className="fa-solid fa-sliders"></i> Min Score Threshold: <strong>{allocatorMinScore}+</strong></label>
-                    <input 
-                      type="range" 
-                      min="50" 
-                      max="85" 
+                    <input
+                      type="range"
+                      min="50"
+                      max="85"
                       step="5"
                       className="allocator-slider"
                       value={allocatorMinScore}
@@ -2715,7 +2810,7 @@ const paginatedStocks = pageSize === -1
 
                   <div className="allocator-input-group">
                     <label><i className="fa-solid fa-layer-group"></i> Strategy:</label>
-                    <select 
+                    <select
                       className="filter-select"
                       value={allocatorStrategy}
                       onChange={(e) => setAllocatorStrategy(e.target.value)}
@@ -2788,8 +2883,8 @@ const paginatedStocks = pageSize === -1
               </div>
 
               <div className="modal-footer">
-                <button 
-                  className="btn btn-secondary" 
+                <button
+                  className="btn btn-secondary"
                   onClick={() => {
                     const csv = ['Ticker,Name,Price,Score,WeightPct,TargetDollars,TargetShares'];
                     allocations.forEach(a => {

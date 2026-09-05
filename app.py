@@ -8,6 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 
 import json
+import stock_oracle_engine
 
 # Import scraping logic from existing scraper script
 import importlib
@@ -444,6 +445,97 @@ def get_news(symbol):
         return jsonify({'symbol': symbol, 'news': news_items})
     except Exception as e:
         return jsonify({'error': f'Failed to fetch news: {str(e)}', 'news': []}), 500
+
+
+@app.route('/api/oracle-analysis', methods=['GET'])
+def get_oracle_analysis_watchlist():
+    """Returns 3-model Stock Oracle summary and leaderboard for all tracked watchlist stocks."""
+    stocks = db.load_stocks()
+    if not stocks and os.path.exists('stocks_data.csv'):
+        try:
+            df = pd.read_csv('stocks_data.csv').fillna('')
+            stocks = df.to_dict(orient='records')
+        except Exception:
+            stocks = []
+            
+    if not stocks:
+        return jsonify([])
+        
+    leaderboard = stock_oracle_engine.generate_watchlist_oracle_leaderboard(stocks)
+    return jsonify(leaderboard)
+
+
+@app.route('/api/oracle-analysis/<symbol>', methods=['GET'])
+def get_oracle_analysis_stock(symbol):
+    """
+    Returns complete 3-thesis analysis, year-by-year 20-year projections, 
+    sensitivity analysis, and diagnostic checklists for a specific stock.
+    Supports query parameters: ?g1=0.15&g2=0.10&g3=0.04&r=0.07 for custom scenario overrides.
+    """
+    symbol = symbol.strip().upper()
+    stocks = db.load_stocks()
+    stock_dict = None
+    
+    for s in stocks:
+        sym = str(s.get('Ticker', s.get('symbol', ''))).strip().upper()
+        if sym == symbol:
+            stock_dict = s
+            break
+            
+    if not stock_dict and os.path.exists('stocks_data.csv'):
+        try:
+            df = pd.read_csv('stocks_data.csv').fillna('')
+            for s in df.to_dict(orient='records'):
+                if str(s.get('Ticker', '')).strip().upper() == symbol:
+                    stock_dict = s
+                    break
+        except Exception:
+            pass
+            
+    # If still not found, try scraping on-the-fly
+    if not stock_dict:
+        name = fetch_name_from_finviz(symbol) or symbol
+        stock_dict = FinvizScraper.scrape_single_stock_dict(symbol, name)
+        if stock_dict:
+            db.save_stocks_batch([stock_dict])
+            
+    if not stock_dict:
+        return jsonify({'error': f'Could not find or fetch data for stock {symbol}'}), 404
+        
+    # Analyze with all 3 theses
+    analysis = stock_oracle_engine.analyze_stock_3_theses(stock_dict)
+    
+    # Check for custom sandbox override query params
+    try:
+        custom_g1 = request.args.get('g1', type=float)
+        custom_g2 = request.args.get('g2', type=float)
+        custom_g3 = request.args.get('g3', type=float)
+        custom_r = request.args.get('r', type=float)
+        
+        if any(v is not None for v in [custom_g1, custom_g2, custom_g3, custom_r]):
+            f = stock_oracle_engine.extract_stock_fundamentals(stock_dict)
+            if custom_g1 is not None:
+                custom_g1 = custom_g1 * 0.01 if custom_g1 > 1.0 else custom_g1
+            if custom_g2 is not None:
+                custom_g2 = custom_g2 * 0.01 if custom_g2 > 1.0 else custom_g2
+            if custom_g3 is not None:
+                custom_g3 = custom_g3 * 0.01 if custom_g3 > 1.0 else custom_g3
+            if custom_r is not None:
+                custom_r = custom_r * 0.01 if custom_r > 1.0 else custom_r
+                
+            analysis['thesis_1'] = stock_oracle_engine.calculate_thesis_1_vmi(
+                f, custom_g1=custom_g1, custom_g2=custom_g2, custom_g3=custom_g3, custom_r=custom_r
+            )
+            analysis['thesis_2'] = stock_oracle_engine.calculate_thesis_2_academic(
+                f, custom_g1=custom_g1, custom_g2=custom_g2, custom_gT=custom_g3, custom_r=custom_r
+            )
+            analysis['thesis_3'] = stock_oracle_engine.calculate_thesis_3_dynamic(
+                f, custom_g1=custom_g1, custom_r=custom_r
+            )
+    except Exception as exc:
+        print(f"Warning: Failed to apply custom parameters: {exc}")
+        
+    return jsonify(analysis)
 
 
 def decode_guru_nuxt_state(script_text):
