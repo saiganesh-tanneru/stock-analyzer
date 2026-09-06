@@ -8,11 +8,11 @@
   "market_cap": 146060000000.0,
   "shares_outstanding": 1030000000.0,
   "beta": 0.98,
-  "wacc": 9.56,
+  "wacc": 10.42,
   "gf_value": 239.0,
   "gf_valuation": "Significantly Undervalued",
   "analyst_target": 140.0,
-  "average_thesis_fair_value": 210.44,
+  "average_thesis_fair_value": 207.21,
   "closest_to_stock_oracle": "Thesis 1 (Adam Khoo VMI)",
   "thesis_1": {
     "model_name": "Thesis 1: Adam Khoo VMI Core Model",
@@ -244,7 +244,7 @@
         "id": 7,
         "name": "Durable Economic Moat",
         "passed": true,
-        "desc": "ROIC (491.0%) vs WACC (9.6%), GM: 74.8%"
+        "desc": "ROIC (491.0%) vs WACC (10.4%), GM: 74.8%"
       }
     ],
     "quality_score": "7/7"
@@ -508,10 +508,10 @@
     "model_name": "Thesis 3: Dynamic Multi-Modal Routing & OracleIQ\u2122 6D Framework",
     "short_name": "Dynamic Routing + OracleIQ",
     "document_source": "A Comprehensive Blueprint for Algorithmic.md",
-    "intrinsic_value": 123.76,
-    "margin_of_safety_pct": -14.1,
-    "signal": "Hold / Fair Value",
-    "signal_badge": "warning",
+    "intrinsic_value": 114.07,
+    "margin_of_safety_pct": -23.8,
+    "signal": "Overvalued",
+    "signal_badge": "danger",
     "routing_type": "DFCF-20 (Median Deceleration Staging)",
     "routing_rationale": "Standard operating enterprise. 3-epoch projection with median stepdown and hurdle rate floor.",
     "routed_details": {
@@ -520,17 +520,17 @@
       "near_term_g1": 0.20170000000000002,
       "median_mid_term_g2": 0.12085000000000001,
       "terminal_g3": 0.04,
-      "discount_rate": 0.0956,
-      "pv_total": 131300829899.5215
+      "discount_rate": 0.1042,
+      "pv_total": 121315765501.65613
     },
     "oracle_iq": {
-      "total_score": 65.0,
+      "total_score": 63.3,
       "predictability": 70.0,
       "profitability": 50.4,
       "growth": 69.0,
       "financial_strength": 75.4,
       "oracle_moat": 95.9,
-      "valuation": 33.0
+      "valuation": 21.4
     },
     "momentum": {
       "sma50": 0.2071,
@@ -558,7 +558,7 @@
     "roe": 0.1424,
     "roic": 4.91,
     "f_score": "5/9",
-    "z_score": 5.56,
+    "z_score": 5.42,
     "growth_g1": 0.20170000000000002
   }
 }

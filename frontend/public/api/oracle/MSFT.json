@@ -1,6 +1,6 @@
 {
   "symbol": "MSFT",
-  "name": "Microsoft Corp",
+  "name": "Microsoft Corp.",
   "sector": "Technology",
   "sub_sector": "Software - Infrastructure",
   "country": "USA",
@@ -8,12 +8,12 @@
   "market_cap": 3710550000000.0,
   "shares_outstanding": 7430000000.0,
   "beta": 1.1,
-  "wacc": 11.31,
-  "gf_value": 581.0,
-  "gf_valuation": "Modestly Undervalued",
+  "wacc": 7.5,
+  "gf_value": null,
+  "gf_valuation": "",
   "analyst_target": 558.0,
-  "average_thesis_fair_value": 336.89,
-  "closest_to_stock_oracle": "Thesis 2 (Academic DFCF-20 + TV)",
+  "average_thesis_fair_value": 365.13,
+  "closest_to_stock_oracle": "N/A",
   "thesis_1": {
     "model_name": "Thesis 1: Adam Khoo VMI Core Model",
     "short_name": "Adam Khoo VMI",
@@ -231,8 +231,8 @@
       {
         "id": 5,
         "name": "High Return on Invested Capital (ROIC >= 10%)",
-        "passed": true,
-        "desc": "ROIC: 2124.0% (Target: >=10%)"
+        "passed": false,
+        "desc": "ROIC: 0.0% (Target: >=10%)"
       },
       {
         "id": 6,
@@ -244,10 +244,10 @@
         "id": 7,
         "name": "Durable Economic Moat",
         "passed": true,
-        "desc": "ROIC (2124.0%) vs WACC (11.3%), GM: 67.9%"
+        "desc": "ROIC (0.0%) vs WACC (7.5%), GM: 67.9%"
       }
     ],
-    "quality_score": "7/7"
+    "quality_score": "6/7"
   },
   "thesis_2": {
     "model_name": "Thesis 2: Academic DFCF-20 + Gordon Perpetuity + Composite",
@@ -508,8 +508,8 @@
     "model_name": "Thesis 3: Dynamic Multi-Modal Routing & OracleIQ\u2122 6D Framework",
     "short_name": "Dynamic Routing + OracleIQ",
     "document_source": "A Comprehensive Blueprint for Algorithmic.md",
-    "intrinsic_value": 193.3,
-    "margin_of_safety_pct": -158.5,
+    "intrinsic_value": 278.04,
+    "margin_of_safety_pct": -79.7,
     "signal": "Overvalued",
     "signal_badge": "danger",
     "routing_type": "DFCF-20 (Median Deceleration Staging)",
@@ -520,16 +520,16 @@
       "near_term_g1": 0.1829,
       "median_mid_term_g2": 0.11145000000000001,
       "terminal_g3": 0.04,
-      "discount_rate": 0.1131,
-      "pv_total": 1487627618558.397
+      "discount_rate": 0.075,
+      "pv_total": 2117303647813.768
     },
     "oracle_iq": {
-      "total_score": 66.5,
+      "total_score": 55.4,
       "predictability": 70.0,
-      "profitability": 88.0,
+      "profitability": 73.0,
       "growth": 59.8,
-      "financial_strength": 83.8,
-      "oracle_moat": 92.6,
+      "financial_strength": 73.3,
+      "oracle_moat": 49.1,
       "valuation": 0.0
     },
     "momentum": {
@@ -556,9 +556,9 @@
     "oper_margin": 0.4678,
     "profit_margin": 0.4031,
     "roe": 0.3404,
-    "roic": 21.24,
-    "f_score": "6/9",
-    "z_score": 9.03,
+    "roic": 0.0,
+    "f_score": "",
+    "z_score": null,
     "growth_g1": 0.1829
   }
 }

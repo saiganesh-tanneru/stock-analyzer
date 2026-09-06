@@ -8,11 +8,11 @@
   "market_cap": 90530000000.0,
   "shares_outstanding": 561000000.0,
   "beta": 0.94,
-  "wacc": 7.03,
+  "wacc": 7.38,
   "gf_value": 168.0,
   "gf_valuation": "Fairly Valued",
   "analyst_target": 181.0,
-  "average_thesis_fair_value": 202.23,
+  "average_thesis_fair_value": 200.31,
   "closest_to_stock_oracle": "Thesis 1 (Adam Khoo VMI)",
   "thesis_1": {
     "model_name": "Thesis 1: Adam Khoo VMI Core Model",
@@ -244,7 +244,7 @@
         "id": 7,
         "name": "Durable Economic Moat",
         "passed": true,
-        "desc": "ROIC (286.0%) vs WACC (7.0%), GM: 68.6%"
+        "desc": "ROIC (286.0%) vs WACC (7.4%), GM: 68.6%"
       }
     ],
     "quality_score": "7/7"
@@ -508,27 +508,27 @@
     "model_name": "Thesis 3: Dynamic Multi-Modal Routing & OracleIQ\u2122 6D Framework",
     "short_name": "Dynamic Routing + OracleIQ",
     "document_source": "A Comprehensive Blueprint for Algorithmic.md",
-    "intrinsic_value": 142.55,
-    "margin_of_safety_pct": -13.1,
-    "signal": "Hold / Fair Value",
-    "signal_badge": "warning",
+    "intrinsic_value": 136.78,
+    "margin_of_safety_pct": -17.9,
+    "signal": "Overvalued",
+    "signal_badge": "danger",
     "routing_type": "DNI-20 (Discounted Net Income)",
     "routing_rationale": "Financial sector assets generate spreads on balance sheet capital rather than traditional operating FCF.",
     "routed_details": {
       "base_metric": "Net Income (TTM)",
       "base_value": 4040000000.0,
       "growth_rate": 0.1233,
-      "discount_rate": 0.0703,
-      "pv_total": 97779620982.71112
+      "discount_rate": 0.0738,
+      "pv_total": 94542961254.19176
     },
     "oracle_iq": {
-      "total_score": 60.0,
+      "total_score": 59.2,
       "predictability": 70.0,
       "profitability": 63.7,
       "growth": 41.0,
       "financial_strength": 63.4,
       "oracle_moat": 92.9,
-      "valuation": 34.2
+      "valuation": 28.5
     },
     "momentum": {
       "sma50": 0.09,

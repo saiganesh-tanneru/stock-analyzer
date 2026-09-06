@@ -8,12 +8,12 @@
   "market_cap": 36000000000.0,
   "shares_outstanding": 1920000000.0,
   "beta": 0.43,
-  "wacc": 9.37,
+  "wacc": 6.4,
   "gf_value": 19.0,
   "gf_valuation": "Fairly Valued",
   "analyst_target": 19.0,
-  "average_thesis_fair_value": 28.94,
-  "closest_to_stock_oracle": "Thesis 1 (Adam Khoo VMI)",
+  "average_thesis_fair_value": 30.43,
+  "closest_to_stock_oracle": "Thesis 3 (Dynamic Routing)",
   "thesis_1": {
     "model_name": "Thesis 1: Adam Khoo VMI Core Model",
     "short_name": "Adam Khoo VMI",
@@ -244,7 +244,7 @@
         "id": 7,
         "name": "Durable Economic Moat",
         "passed": true,
-        "desc": "ROIC (951.0%) vs WACC (9.4%), GM: 58.4%"
+        "desc": "ROIC (951.0%) vs WACC (6.4%), GM: 58.4%"
       }
     ],
     "quality_score": "6/7"
@@ -508,8 +508,8 @@
     "model_name": "Thesis 3: Dynamic Multi-Modal Routing & OracleIQ\u2122 6D Framework",
     "short_name": "Dynamic Routing + OracleIQ",
     "document_source": "A Comprehensive Blueprint for Algorithmic.md",
-    "intrinsic_value": 10.79,
-    "margin_of_safety_pct": -73.7,
+    "intrinsic_value": 15.26,
+    "margin_of_safety_pct": -22.8,
     "signal": "Overvalued",
     "signal_badge": "danger",
     "routing_type": "DFCF-20 (Median Deceleration Staging)",
@@ -520,17 +520,17 @@
       "near_term_g1": 0.0741,
       "median_mid_term_g2": 0.057050000000000003,
       "terminal_g3": 0.04,
-      "discount_rate": 0.09369999999999999,
-      "pv_total": 28264134145.637196
+      "discount_rate": 0.064,
+      "pv_total": 36847402011.410965
     },
     "oracle_iq": {
-      "total_score": 47.7,
+      "total_score": 51.1,
       "predictability": 70.0,
       "profitability": 51.2,
       "growth": 17.7,
-      "financial_strength": 68.1,
+      "financial_strength": 68.0,
       "oracle_moat": 88.0,
-      "valuation": 0.0
+      "valuation": 22.6
     },
     "momentum": {
       "sma50": -0.0229,
@@ -558,7 +558,7 @@
     "roe": 0.1558,
     "roic": 9.51,
     "f_score": "8/9",
-    "z_score": 2.25,
+    "z_score": 2.24,
     "growth_g1": 0.0741
   }
 }

@@ -8,11 +8,11 @@
   "market_cap": 28180000000.0,
   "shares_outstanding": 531000000.0,
   "beta": 0.78,
-  "wacc": 6.84,
+  "wacc": 6.93,
   "gf_value": 174.0,
   "gf_valuation": "Possible Value Trap, Think Twice",
   "analyst_target": 57.0,
-  "average_thesis_fair_value": 86.11,
+  "average_thesis_fair_value": 85.86,
   "closest_to_stock_oracle": "Thesis 2 (Academic DFCF-20 + TV)",
   "thesis_1": {
     "model_name": "Thesis 1: Adam Khoo VMI Core Model",
@@ -244,7 +244,7 @@
         "id": 7,
         "name": "Durable Economic Moat",
         "passed": true,
-        "desc": "ROIC (485.0%) vs WACC (6.8%), GM: 56.4%"
+        "desc": "ROIC (485.0%) vs WACC (6.9%), GM: 56.4%"
       }
     ],
     "quality_score": "4/7"
@@ -508,10 +508,10 @@
     "model_name": "Thesis 3: Dynamic Multi-Modal Routing & OracleIQ\u2122 6D Framework",
     "short_name": "Dynamic Routing + OracleIQ",
     "document_source": "A Comprehensive Blueprint for Algorithmic.md",
-    "intrinsic_value": 46.84,
-    "margin_of_safety_pct": -13.2,
-    "signal": "Hold / Fair Value",
-    "signal_badge": "warning",
+    "intrinsic_value": 46.07,
+    "margin_of_safety_pct": -15.0,
+    "signal": "Overvalued",
+    "signal_badge": "danger",
     "routing_type": "DFCF-20 (Median Deceleration Staging)",
     "routing_rationale": "Standard operating enterprise. 3-epoch projection with median stepdown and hurdle rate floor.",
     "routed_details": {
@@ -520,17 +520,17 @@
       "near_term_g1": 0.013999999999999999,
       "median_mid_term_g2": 0.027,
       "terminal_g3": 0.04,
-      "discount_rate": 0.0684,
-      "pv_total": 52226302704.7097
+      "discount_rate": 0.0693,
+      "pv_total": 51817875542.75231
     },
     "oracle_iq": {
-      "total_score": 46.6,
+      "total_score": 46.2,
       "predictability": 70.0,
       "profitability": 48.8,
       "growth": 2.9,
       "financial_strength": 50.2,
       "oracle_moat": 87.1,
-      "valuation": 34.2
+      "valuation": 31.9
     },
     "momentum": {
       "sma50": 0.0161,

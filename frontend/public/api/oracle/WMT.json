@@ -8,11 +8,11 @@
   "market_cap": 850020000000.0,
   "shares_outstanding": 7940000000.0,
   "beta": 0.58,
-  "wacc": 7.0,
+  "wacc": 6.9,
   "gf_value": 103.0,
   "gf_valuation": "Fairly Valued",
   "analyst_target": 130.0,
-  "average_thesis_fair_value": 55.93,
+  "average_thesis_fair_value": 56.05,
   "closest_to_stock_oracle": "Thesis 2 (Academic DFCF-20 + TV)",
   "thesis_1": {
     "model_name": "Thesis 1: Adam Khoo VMI Core Model",
@@ -244,7 +244,7 @@
         "id": 7,
         "name": "Durable Economic Moat",
         "passed": true,
-        "desc": "ROIC (1164.0%) vs WACC (7.0%), GM: 25.2%"
+        "desc": "ROIC (1164.0%) vs WACC (6.9%), GM: 25.2%"
       }
     ],
     "quality_score": "6/7"
@@ -508,8 +508,8 @@
     "model_name": "Thesis 3: Dynamic Multi-Modal Routing & OracleIQ\u2122 6D Framework",
     "short_name": "Dynamic Routing + OracleIQ",
     "document_source": "A Comprehensive Blueprint for Algorithmic.md",
-    "intrinsic_value": 30.4,
-    "margin_of_safety_pct": -252.4,
+    "intrinsic_value": 30.77,
+    "margin_of_safety_pct": -248.2,
     "signal": "Overvalued",
     "signal_badge": "danger",
     "routing_type": "DFCF-20 (Median Deceleration Staging)",
@@ -520,8 +520,8 @@
       "near_term_g1": 0.1119,
       "median_mid_term_g2": 0.07595,
       "terminal_g3": 0.04,
-      "discount_rate": 0.07,
-      "pv_total": 303550473508.03937
+      "discount_rate": 0.069,
+      "pv_total": 306471692847.35516
     },
     "oracle_iq": {
       "total_score": 49.9,
@@ -558,7 +558,7 @@
     "roe": 0.23440000000000003,
     "roic": 11.64,
     "f_score": "6/9",
-    "z_score": 5.97,
+    "z_score": 5.94,
     "growth_g1": 0.1119
   }
 }

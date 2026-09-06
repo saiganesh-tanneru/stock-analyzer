@@ -8,11 +8,11 @@
   "market_cap": 175530000000.0,
   "shares_outstanding": 484570000.0,
   "beta": 1.24,
-  "wacc": 13.53,
+  "wacc": 13.18,
   "gf_value": 332.0,
   "gf_valuation": "Fairly Valued",
   "analyst_target": 467.5,
-  "average_thesis_fair_value": 1020.17,
+  "average_thesis_fair_value": 1025.08,
   "closest_to_stock_oracle": "Thesis 3 (Dynamic Routing)",
   "thesis_1": {
     "model_name": "Thesis 1: Adam Khoo VMI Core Model",
@@ -244,7 +244,7 @@
         "id": 7,
         "name": "Durable Economic Moat",
         "passed": true,
-        "desc": "ROIC (1031.0%) vs WACC (13.5%), GM: 60.4%"
+        "desc": "ROIC (1031.0%) vs WACC (13.2%), GM: 60.4%"
       }
     ],
     "quality_score": "7/7"
@@ -508,9 +508,9 @@
     "model_name": "Thesis 3: Dynamic Multi-Modal Routing & OracleIQ\u2122 6D Framework",
     "short_name": "Dynamic Routing + OracleIQ",
     "document_source": "A Comprehensive Blueprint for Algorithmic.md",
-    "intrinsic_value": 439.81,
-    "margin_of_safety_pct": 17.6,
-    "signal": "Buy",
+    "intrinsic_value": 454.52,
+    "margin_of_safety_pct": 20.3,
+    "signal": "Strong Buy",
     "signal_badge": "success",
     "routing_type": "DFCF-20 (Median Deceleration Staging)",
     "routing_rationale": "Standard operating enterprise. 3-epoch projection with median stepdown and hurdle rate floor.",
@@ -520,17 +520,17 @@
       "near_term_g1": 0.3614,
       "median_mid_term_g2": 0.2007,
       "terminal_g3": 0.04,
-      "discount_rate": 0.1353,
-      "pv_total": 219850299522.99194
+      "discount_rate": 0.1318,
+      "pv_total": 226977986680.1108
     },
     "oracle_iq": {
-      "total_score": 80.8,
+      "total_score": 81.2,
       "predictability": 70.0,
       "profitability": 61.6,
       "growth": 100.0,
       "financial_strength": 92.9,
       "oracle_moat": 89.0,
-      "valuation": 71.2
+      "valuation": 74.4
     },
     "momentum": {
       "sma50": -0.0401,
@@ -558,7 +558,7 @@
     "roe": 0.1223,
     "roic": 10.31,
     "f_score": "8/9",
-    "z_score": 7.99,
+    "z_score": 8.1,
     "growth_g1": 0.3614
   }
 }

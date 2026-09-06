@@ -8,12 +8,12 @@
   "market_cap": 19710000000.0,
   "shares_outstanding": 114000000.0,
   "beta": 0.92,
-  "wacc": 6.95,
-  "gf_value": 246.0,
-  "gf_valuation": "Modestly Undervalued",
+  "wacc": 7.8,
+  "gf_value": 247.0,
+  "gf_valuation": "Significantly Undervalued",
   "analyst_target": 214.0,
-  "average_thesis_fair_value": 275.11,
-  "closest_to_stock_oracle": "Thesis 3 (Dynamic Routing)",
+  "average_thesis_fair_value": 269.2,
+  "closest_to_stock_oracle": "Thesis 1 (Adam Khoo VMI)",
   "thesis_1": {
     "model_name": "Thesis 1: Adam Khoo VMI Core Model",
     "short_name": "Adam Khoo VMI",
@@ -244,7 +244,7 @@
         "id": 7,
         "name": "Durable Economic Moat",
         "passed": true,
-        "desc": "ROIC (1259.0%) vs WACC (7.0%), GM: 31.8%"
+        "desc": "ROIC (1259.0%) vs WACC (7.8%), GM: 31.8%"
       }
     ],
     "quality_score": "7/7"
@@ -508,10 +508,10 @@
     "model_name": "Thesis 3: Dynamic Multi-Modal Routing & OracleIQ\u2122 6D Framework",
     "short_name": "Dynamic Routing + OracleIQ",
     "document_source": "A Comprehensive Blueprint for Algorithmic.md",
-    "intrinsic_value": 206.03,
-    "margin_of_safety_pct": 16.1,
-    "signal": "Buy",
-    "signal_badge": "success",
+    "intrinsic_value": 188.28,
+    "margin_of_safety_pct": 8.2,
+    "signal": "Hold / Fair Value",
+    "signal_badge": "warning",
     "routing_type": "DFCF-20 (Median Deceleration Staging)",
     "routing_rationale": "Standard operating enterprise. 3-epoch projection with median stepdown and hurdle rate floor.",
     "routed_details": {
@@ -520,17 +520,17 @@
       "near_term_g1": 0.09730000000000001,
       "median_mid_term_g2": 0.06865,
       "terminal_g3": 0.04,
-      "discount_rate": 0.0695,
-      "pv_total": 26606276095.631836
+      "discount_rate": 0.078,
+      "pv_total": 24582801788.480385
     },
     "oracle_iq": {
-      "total_score": 65.0,
+      "total_score": 63.5,
       "predictability": 70.0,
       "profitability": 75.5,
       "growth": 30.7,
-      "financial_strength": 77.3,
+      "financial_strength": 76.9,
       "oracle_moat": 75.3,
-      "valuation": 69.3
+      "valuation": 59.8
     },
     "momentum": {
       "sma50": 0.0735,
@@ -558,7 +558,7 @@
     "roe": 0.4092,
     "roic": 12.59,
     "f_score": "8/9",
-    "z_score": 4.17,
+    "z_score": 4.11,
     "growth_g1": 0.09730000000000001
   }
 }
